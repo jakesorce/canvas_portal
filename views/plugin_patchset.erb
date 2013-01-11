@@ -1,0 +1,14 @@
+<div id="plugin_patchset_contents" class="invisible action-contents">
+  <form id="plugin_form" class="form-horizontal" method="post">
+    <div class="control-group">
+      <label class="control-label">Checkout URL:</label>
+      <div class="controls">
+        <input required name="patchset_url" id="patchset_url" type="text" placeholder="git fetch ssh://user@gerrit.instructure.com:29418/custom_reports refs/changes/63/15263/1 && git checkout FETCH_HEAD" />
+        <button type="button" class="plugins_help_button btn hidden-phone">Help?</button>
+      </div>
+    </div>
+    <div>
+      <input id="generate_environment" type="submit" value="Generate Environment" name="submit" class="btn btn-primary" />
+    </div>
+  </form>
+</div>

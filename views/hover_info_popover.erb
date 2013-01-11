@@ -1,0 +1,47 @@
+<% info_file = "/home/hudson/files/portal_info.txt" %>
+<% error_file = "/home/hudson/files/error.txt" %>
+<% error_text = "error occurred on last action, try again" %>
+<% no_action_text = "no portal action has taken place" %>
+<% patchset_file = "/home/hudson/files/patchset.txt" %>
+<% branch_file = "/home/hudson/files/branch.txt" %>
+<% dt_last_action = no_action_text %>
+<% last_action = no_action_text %>
+<% if File.exists? info_file %>
+  <% dt_last_action = File.readlines(info_file).first %>
+  <% last_action = File.readlines(info_file).last %>
+<% elsif File.exists? error_file %>
+  <% dt_last_action = error_text %>
+  <% last_action = error_text %>
+<% end %>
+
+<div id="canvas_state_info" class="invisible">
+  <div id="hover_info_popup" class="center">
+    <div class="pad-bottom">
+      <h5>Current Branch:</h5> 
+      <div id="branch_info"><%= File.readlines(branch_file).first rescue Dir.chdir('/home/hudson/canvas-lms') { `git rev-parse --abbrev-ref HEAD` } %></div>
+    </div>
+    <% if File.exists? patchset_file %>
+      <div class="pad-bottom">
+        <h5>Current Patchset:</h5>
+        <div id="patchset_info"><%= File.readlines(patchset_file).first %></div>
+      </div>
+    <% end %>
+    <div class="pad-bottom">
+      <h5>Date and Time of Last Action:</h5> 
+      <div id="action_info"><%= dt_last_action %></div>
+    </div>
+    <div class="pad-bottom">
+      <h5>Last Action Performed:</h5>
+      <div id="last_action"><%= last_action %></div>
+    </div>
+    <div class="pad-bottom">
+      <h5>Canvas Ruby Version:</h5>
+      <div><%= `rbenv global` %></div>
+    </div>
+    <div class="pad-bottom">
+      <h5>Canvas Defaults:</h5>
+      <div>Username: test</div> 
+      <div>Password: password</div>
+    </div>
+  </div>
+</div>

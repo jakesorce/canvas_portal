@@ -1,0 +1,77 @@
+* {
+  margin: 0; }
+
+html, body {
+  height: 100%;
+  width: 100%; }
+
+#portal_contents {
+  padding-top: 15%; }
+
+#version-label {
+  padding-top: 6px; }
+
+#branches_list {
+  background-color: white;
+  overflow: scroll;
+  height: 400px; }
+
+#supported_plugins {
+  background-color: white;
+  overflow: scroll;
+  height: 400px; }
+  #supported_plugins #plugins_list {
+    list-style-type: none; }
+
+#loading-img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto; }
+
+#progressbar {
+  width: 1%; }
+
+#progress_info {
+  margin-left: 35px; }
+
+.wrapper {
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin: 0 auto -142px; }
+
+.right-sixty {
+  margin-right: 60px; }
+
+.footer, .push {
+  height: 142px; }
+
+.action-contents {
+  width: 530px;
+  margin: auto auto 10px auto; }
+
+.center {
+  text-align: center; }
+
+.underline {
+  text-decoration: underline; }
+
+.pad-bottom {
+  padding-bottom: 30px; }
+
+.popup-link a {
+  color: red;
+  font-size: 16px; }
+
+.white-readable {
+  color: white;
+  text-shadow: black 0.1em 0.1em 0.2em; }
+
+.button-holder {
+  text-align: center; }
+
+.dropdown-menu li {
+  text-align: left; }
+
+.force-hide {
+  display: none !important; }

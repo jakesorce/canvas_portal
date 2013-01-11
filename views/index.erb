@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Canvas Portal</title>
+    <link href="/images/favicon.ico" rel="icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <%= css_assets 'base' %>
+  </head>
+  <body>
+    <div class="wrapper">
+    <div id="portal_contents" class="center">
+      <h1 class="pad-bottom">Canvas Portal</h1>
+      <div id="basic_options" class="pad-bottom">
+        <%= erb :basic_options %>
+      </div>
+      <div id="advanced_options" class="invisible pad-bottom">
+        <%= erb :advanced_options %>
+      </div>
+      <%= erb :multiple_patchsets %>
+      <%= erb :branch_contents %>
+      <%= erb :patchset %>
+      <%= erb :plugin_patchset %>
+      <a href="#" id="option_toggle_link">Advanced Options</a>
+    <div class="push"></div>
+    </div>
+  </div>
+  <div id="footer" class="footer center hidden-phone" rel="popover">
+    <img id="footer_img" src="images/canvas.png" />
+  </div>
+  <%= erb :snake_loading_screen %>
+  <%= erb :help_popup %>
+  <%= erb :plugins_help_popup %>
+  <%= erb :branches_list_popup %>
+  <%= erb :version_modal %>
+  <%= erb :hover_info_popover %>
+  <%= erb :patchset_template %>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="javascripts/effects.core.min.js" type="text/javascript"></script>
+  <script src="javascripts/effects.highlight.min.js" type="text/javascript"></script>
+  <script src="javascripts/bpopup.min.js" type="text/javascript"></script>
+  <script src="javascripts/bootstrap.min.js" type="text/javascript"></script>
+  <script src="javascripts/base.min.js" type="text/javascript"></script>
+  </body>
+</html>

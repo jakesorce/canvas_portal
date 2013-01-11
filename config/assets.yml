@@ -1,0 +1,11 @@
+js:
+  base:
+    - portal.js
+  server-status:
+    - serverstatus.js
+  bpopup:
+    - bpopup.js
+css:
+  base:
+    - style.css
+    - bootstrap.css

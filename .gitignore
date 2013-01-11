@@ -1,0 +1,4 @@
+.sass-cache/*
+*.lock
+.idea/*
+/config/email.yml

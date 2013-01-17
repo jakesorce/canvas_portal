@@ -451,7 +451,12 @@
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
     });
-    $('#patchset_canvas_net').bind('click', function(e) {});
+    $('#patchset_canvas_net').bind('click', function(e) {
+      var action;
+      action = 'plugin_canvas_net';
+      dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
+      return $('#canvasnet_patchset_contents').slideToggle();
+    });
     $('#multiple_patchsets_option').bind('click', function(e) {
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       return $('#multiple_patchset_contents').slideToggle();

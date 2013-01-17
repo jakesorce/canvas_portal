@@ -8,6 +8,7 @@ require 'active_support/core_ext/time/zones'
 require 'active_support/time_with_zone'
 require 'mail'
 require 'yaml'
+require '/home/hudson/portal/helpers/html'
 
 ONE_EIGHT_SHELL = "bash -lc 'rbenv shell ree-1.8.7-2011.03 && rbenv rehash &&"
 ONE_NINE_SHELL = "bash -lc 'rbenv shell 1.9.3-p286 && rbenv rehash &&"
@@ -34,13 +35,11 @@ end
 
 class Portal < Sinatra::Application
   register Sinatra::Minify
-  
+  helpers Sinatra::HtmlHelpers
+   
   set :js_path, 'public/javascripts'
   set :js_url, '/javascripts'
   
-  helpers do
-    include Rack::Utils
-  end
 end
 
 require_relative 'routes/init'

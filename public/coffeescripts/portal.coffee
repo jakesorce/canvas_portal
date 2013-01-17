@@ -342,7 +342,9 @@ $ ->
       setDropdownText($advancedOptionsDropdown, dropdownMessage)
 
   $('#patchset_canvas_net').bind 'click', (e) ->
-    #dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
+    action = 'plugin_canvas_net'
+    dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
+    $('#canvasnet_patchset_contents').slideToggle()
  
   $('#multiple_patchsets_option').bind 'click', (e) ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)

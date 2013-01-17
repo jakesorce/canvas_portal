@@ -9,23 +9,24 @@
   </head>
   <body>
     <div class="wrapper">
-    <div id="portal_contents" class="center">
-      <h1 class="pad-bottom">Canvas Portal</h1>
-      <div id="basic_options" class="pad-bottom">
-        <%= erb :basic_options %>
-      </div>
-      <div id="advanced_options" class="invisible pad-bottom">
-        <%= erb :advanced_options %>
-      </div>
-      <%= erb :multiple_patchsets %>
-      <%= erb :branch_contents %>
-      <%= erb :patchset %>
-      <%= erb :plugin_patchset %>
-      <a href="#" id="option_toggle_link">Advanced Options</a>
-      <div>
-        <textarea disabled='disabled' id="error_log_holder" class="invisible"></textarea>
-      </div>
-    <div class="push"></div>
+      <div id="portal_contents" class="center">
+        <h1 class="pad-bottom">Canvas Portal</h1>
+        <div id="basic_options" class="pad-bottom">
+          <%= erb :basic_options %>
+        </div>
+        <div id="advanced_options" class="invisible pad-bottom">
+          <%= erb :advanced_options %>
+        </div>
+        <%= erb :multiple_patchsets %>
+        <%= erb :branch_contents %>
+        <%= erb :patchset %>
+        <%= erb :plugin_patchset %>
+        <%= erb :canvasnet_patchset %>
+        <a href="#" id="option_toggle_link">Advanced Options</a>
+        <div>
+          <textarea disabled='disabled' id="error_log_holder" class="invisible"></textarea>
+        </div>
+      <div class="push"></div>
     </div>
   </div>
   <div id="footer" class="footer center hidden-phone" rel="popover">

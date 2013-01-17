@@ -16,6 +16,7 @@ class Portal < Sinatra::Application
           dt_last_action = last_action = 'no portal action has taken place'
         end
         erb :index
+        #haml :index, :format => :html5
       else
         plugin_info = File.open(PLUGIN_FILE) { |file| file.gets } if File.exists? PLUGIN_FILE
         patchset = File.open(PATCHSET_FILE) { |file| file.gets } if File.exists? PATCHSET_FILE

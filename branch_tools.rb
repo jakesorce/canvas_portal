@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 require 'optparse'
-ERROR_FILE = "/home/hudson/files/error.txt"
+
+ERROR_FILE = '/home/hudson/files/error.txt'
 OLD_BRANCH_FILE = '/home/hudson/files/old_branch.txt'
-# This hash will hold all of the options
-# parsed from the command-line by
-# OptionParser.
+GERRIT_URL = 'ssh://hudson@10.86.151.193/home/gerrit'
+
 options = {}
 action = ''
 
@@ -103,6 +103,10 @@ def recreate_cassandra_keyspace
   system('cassandra-cli -f /home/hudson/files/cassandra.txt')
 end
 
+def create_pg_extenstion
+  `sudo -su postgres psql -d canvas_development -c "CREATE EXTENSION pg_trgm"`
+end
+
 def enable_features
   require File.dirname(__FILE__) + "/config/environment" unless defined?(RAILS_ROOT)
   Setting.set('enable_page_views', 'db')
@@ -132,6 +136,20 @@ def bundle
   system('bundle update')
 end
 
+def create_migrate_assets(drop = false)
+  if drop
+    `bundle exec rake db:drop`
+    `bundle exec rake db:create`
+    create_pg_extension
+    `bundle exec rake db:migrate`
+    `bundle exec rake canvas:compile_assets[false]`
+  else
+    `bundle exec rake db:create`
+    `bundle exec rake db:migrate`
+    `bundle exec rake canvas:compile_assets`
+  end
+end
+
 def full_update(recreate_database = false)
   bundle
   delete_command_1 = "delete from schema_migrations where version = '20121107163612';"
@@ -142,9 +160,9 @@ def full_update(recreate_database = false)
   if recreate_database
     delayed_jobs('stop')
     kill_database_connections
-    `bundle exec rake db:drop db:create db:migrate portal:compile_assets[false]`
+    create_migrate_assets(true)
   else
-    `bundle exec rake db:create db:migrate portal:compile_assets[false]`
+    create_migrate_assets
   end
   check_for_error($?.exitstatus)
 end
@@ -201,14 +219,14 @@ def checkout_plugin(plugin, origin = nil)
   clone_statement = generate_origin_url(origin)
   if plugin == 'Analytics'
     plugin = 'canvalytics'
-    system("#{clone_statement} ssh://hudson@10.86.151.193/home/gerrit/#{plugin}.git vendor/plugins/analytics")
+    system("#{clone_statement} #{GERRIT_URL}/#{plugin}.git vendor/plugins/analytics")
   elsif plugin == 'QTI Migration Tool'
     plugin = 'QTIMigrationTool'
-    system("#{clone_statement} ssh://hudson@10.86.151.193/home/gerrit/#{plugin}.git vendor/#{plugin}")
+    system("#{clone_statement} #{GERRIT_URL}/#{plugin}.git vendor/#{plugin}")
   else
     plugin.downcase!
     plugin.gsub!(' ', '_')
-    system("#{clone_statement} ssh://hudson@10.86.151.193/home/gerrit/#{plugin}.git vendor/plugins/#{plugin}")
+    system("#{clone_statement} #{GERRIT_URL}/#{plugin}.git vendor/plugins/#{plugin}")
   end
 end
 
@@ -264,6 +282,7 @@ def kill_database_connections
   system("sudo -u postgres psql -c \"#{drop_command_queue}\"")
   system("psql -U canvas -c 'drop database canvas_development;'")
   system("psql -U canvas -c 'create database canvas_development;'")
+  create_pg_extension
   system("psql -U canvas -c 'drop database canvas_queue_development;'")
   system("psql -U canvas -c 'create database canvas_queue_development;'")
 end
@@ -271,8 +290,8 @@ end
 def checkout_all_plugins(do_remove = true, origin = nil)
   remove_all_plugins if do_remove
   clone_statement = generate_origin_url(origin)
-  system("#{clone_statement} ssh://hudson@10.86.151.193/home/gerrit/canvalytics.git vendor/plugins/analytics")
-  system("#{clone_statement} ssh://hudson@10.86.151.193/home/gerrit/qti_migration_tool.git vendor/QTIMigrationTool")
+  system("#{clone_statement} #{GERRIT_URL}/canvalytics.git vendor/plugins/analytics")
+  system("#{clone_statement} #{GERRIT_URL}/qti_migration_tool.git vendor/QTIMigrationTool")
   VENDOR_PLUGINS.each { |plugin| checkout_plugin(plugin, origin) }
 end
 
@@ -325,16 +344,15 @@ Dir.chdir('/home/hudson/canvas-lms') do
         reset_branch
         exit! 1
       end
-      bundle
       full_update
-      post_setup(true)
+      post_setup
     when 'checkout multiple'
       patchsets = options[:patchsets].split(',')
       reset_branch
       basic_update
       checkout_all_plugins
       patchsets.each do |patchset|
-        `git fetch ssh://hudson@10.86.151.193/home/gerrit/canvas-lms.git refs/changes/#{patchset} && git cherry-pick FETCH_HEAD`
+        `git fetch #{GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git cherry-pick FETCH_HEAD`
         if $?.exitstatus != 0
           write_to_file(ERROR_FILE, 'there were conflicts checking out one or more of the patchsets, please make sure all patchsets are in the correct order and have all been rebased recently')
           reset_branch
@@ -342,8 +360,9 @@ Dir.chdir('/home/hudson/canvas-lms') do
         end
       end
       full_update
-      post_setup(true)
+      post_setup
     when 'dump database'
+      bundle
       database_dcm_initial_data
       post_setup
     when 'use master'
@@ -378,24 +397,25 @@ Dir.chdir('/home/hudson/canvas-lms') do
         exit! 1 
       end
       full_update(true)
-      post_setup(true)
+      post_setup
     when 'remove plugins'
       remove_all_plugins
     when 'enable features'
       enable_features
     when 'generate documentation'
+      bundle
       generate_documentation
       apache_action('start')
     when 'localize'
       checkout_all_plugins
       full_update
-      post_setup(true, true)
+      post_setup(false, true)
     when 'ruby version change'
       reset_branch_options(options)
       checkout_all_plugins
       basic_update
       full_update
-      post_setup(true)
+      post_setup
     when 'plugin patchset'
       plugin = options[:plugin_for_patchset]
       reset_branch
@@ -419,6 +439,6 @@ Dir.chdir('/home/hudson/canvas-lms') do
         end
       end
       full_update
-      post_setup(true)
+      post_setup
   end
 end

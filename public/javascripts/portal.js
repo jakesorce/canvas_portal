@@ -297,7 +297,7 @@
       action = 'change_version';
       e.preventDefault();
       $version = $('#version_text').text().split(' ')[0];
-      openLoadingScreen("Version change " + $version + "...", action);
+      openLoadingScreen("Switching to " + $version + "...", action);
       $versionModal.modal('hide');
       return sendPost("/" + action, $version);
     });
@@ -433,7 +433,7 @@
       var action;
       action = 'master_canvas_net';
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
-      if (confirmation('Changing to Canvas Network will switch your Ruby version to 1.8.7, continue?')) {
+      if (confirmation('Really change to Canvas Network Master?')) {
         openLoadingScreen('Canvas Network Master...', action);
         return sendPost("/" + action, null);
       } else {
@@ -447,7 +447,7 @@
     });
     $('#start_server').bind('click', function(e) {
       var action;
-      action = 'start server';
+      action = 'start_server';
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation('Do you really want to start the server again? This could result in you having old code and outdated assets. Only do this if you really know what you are doing!')) {
         openLoadingScreen('Starting Server...', action);

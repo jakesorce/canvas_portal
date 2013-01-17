@@ -8,6 +8,10 @@ class Portal < Sinatra::Application
     response.write(time)
     status 200
   end
+ 
+  get "/error_log" do
+    response.write(`cat /home/hudson/logs/sinatra_server_log.txt`)
+  end
 
   post "/dcm_initial_data/:environment" do |environment|
     execution_time = Benchmark.realtime do

@@ -5,6 +5,11 @@ html, body {
   height: 100%;
   width: 100%; }
 
+textarea {
+  resize: none;
+  width: 600px !important;
+  height: 200px !important; }
+
 #portal_contents {
   padding-top: 15%; }
 

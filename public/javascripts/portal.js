@@ -2,7 +2,7 @@
 (function() {
 
   $(function() {
-    var $advancedOptionsDropdown, $basicOptionsDropdown, $branchContents, $branches, $loadingDiv, $multiplePatchsetContents, $patchsetContents, $pluginPatchsetContents, $portalForm, $versionModal, branchLinkClickHandler, closePatchset, confirmation, disableBeforeUnload, disableElement, dropdownMessage, dropdownOptionClicked, enableBeforeUnload, enableElement, generateBranchHtml, generatePluginsHtml, hideContents, isUnique, openLoadingScreen, progressbar, sendPost, setDropdownText, setLoadingText, validatePatchset;
+    var $advancedOptionsDropdown, $basicOptionsDropdown, $branchContents, $branches, $errorLogHolder, $loadingDiv, $multiplePatchsetContents, $patchsetContents, $pluginPatchsetContents, $portalForm, $versionModal, branchLinkClickHandler, closePatchset, confirmation, disableBeforeUnload, disableElement, dropdownMessage, dropdownOptionClicked, enableBeforeUnload, enableElement, generateBranchHtml, generatePluginsHtml, hideContents, isUnique, openLoadingScreen, progressbar, sendPost, setDropdownText, setLoadingText, validatePatchset;
     $loadingDiv = $('#loading');
     $portalForm = $('#portal_form');
     $branches = $('#branches');
@@ -13,6 +13,7 @@
     $multiplePatchsetContents = $('#multiple_patchset_contents');
     $pluginPatchsetContents = $('#plugin_patchset_contents');
     $versionModal = $('#version_modal');
+    $errorLogHolder = $('#error_log_holder');
     dropdownMessage = 'What do you want to do?';
     $('#footer_img').effect("highlight", {}, 1500);
     enableBeforeUnload = function() {
@@ -53,7 +54,10 @@
         $pluginPatchsetContents.slideToggle();
       }
       if ($multiplePatchsetContents.is(':visible')) {
-        return $multiplePatchsetContents.slideToggle();
+        $multiplePatchsetContents.slideToggle();
+      }
+      if ($errorLogHolder.is(':visible')) {
+        return $errorLogHolder.slideToggle();
       }
     };
     dropdownOptionClicked = function(e, elementClicked, dropdown) {
@@ -428,6 +432,13 @@
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
+    });
+    $('#view_error_log').bind('click', function(e) {
+      dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
+      $.get('/error_log', function(data) {
+        return $errorLogHolder.text(data);
+      });
+      return $errorLogHolder.slideToggle();
     });
     $('#master_canvas_net').bind('click', function(e) {
       var action;

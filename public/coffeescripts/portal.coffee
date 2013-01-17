@@ -9,6 +9,7 @@ $ ->
   $multiplePatchsetContents = $('#multiple_patchset_contents')
   $pluginPatchsetContents = $('#plugin_patchset_contents')
   $versionModal = $('#version_modal')
+  $errorLogHolder = $('#error_log_holder')
   dropdownMessage = 'What do you want to do?'
 
   $('#footer_img').effect("highlight", {}, 1500)
@@ -40,6 +41,7 @@ $ ->
     $branchContents.slideToggle() if $branchContents.is(':visible')
     $pluginPatchsetContents.slideToggle() if $pluginPatchsetContents.is(':visible')
     $multiplePatchsetContents.slideToggle() if $multiplePatchsetContents.is(':visible')
+    $errorLogHolder.slideToggle() if $errorLogHolder.is(':visible')
 
   dropdownOptionClicked = (e, elementClicked, dropdown) ->
     hideContents()
@@ -323,6 +325,12 @@ $ ->
       sendPost("/#{action}", null)
     else
       setDropdownText($advancedOptionsDropdown, dropdownMessage)
+
+  $('#view_error_log').bind 'click', (e) ->
+    dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
+    $.get('/error_log', (data) ->
+      $errorLogHolder.text(data))
+    $errorLogHolder.slideToggle()
 
   $('#master_canvas_net').bind 'click', (e) ->
     action = 'master_canvas_net'

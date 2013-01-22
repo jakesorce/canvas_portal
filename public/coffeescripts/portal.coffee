@@ -10,6 +10,7 @@ $ ->
   $pluginPatchsetContents = $('#plugin_patchset_contents')
   $versionModal = $('#version_modal')
   $errorLogHolder = $('#error_log_holder')
+  $canvasnetPatchsetContents = $('#canvasnet_patchset_contents')
   dropdownMessage = 'What do you want to do?'
 
   $('#footer_img').effect("highlight", {}, 1500)
@@ -42,7 +43,8 @@ $ ->
     $pluginPatchsetContents.slideToggle() if $pluginPatchsetContents.is(':visible')
     $multiplePatchsetContents.slideToggle() if $multiplePatchsetContents.is(':visible')
     $errorLogHolder.slideToggle() if $errorLogHolder.is(':visible')
-
+    $canvasnetPatchsetContents.slideToggle() if $canvasnetPatchsetContents.is(':visible')
+   
   dropdownOptionClicked = (e, elementClicked, dropdown) ->
     hideContents()
     e.preventDefault()
@@ -204,6 +206,14 @@ $ ->
       openLoadingScreen(null, action)
       sendPost("/#{action}", $patchsetUrl)
 
+  $('#canvasnet_patchset_form').bind 'submit', (e) ->
+    action = 'canvasnet_patchset'
+    e.preventDefault()
+    $patchset = $('#canvasnet_patchset')
+    if validatePatchset($patchset) is 0
+      openLoadingScreen(null, action)
+      sendPost("/#{action}", $patchset)
+
   $('#footer_img').popover
     title: 'Portal Info',
     trigger: 'hover', 
@@ -344,7 +354,7 @@ $ ->
   $('#patchset_canvas_net').bind 'click', (e) ->
     action = 'plugin_canvas_net'
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
-    $('#canvasnet_patchset_contents').slideToggle()
+    $canvasnetPatchsetContents.slideToggle()
  
   $('#multiple_patchsets_option').bind 'click', (e) ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)

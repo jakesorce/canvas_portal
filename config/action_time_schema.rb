@@ -1,10 +1,11 @@
+CONFIG = YAML.load_file(File.join(File.dirname(__FILE__), 'action_times_config.yml'))
 ActiveRecord::Base.establish_connection(
     :adapter => 'mysql2',
     :host => 'localhost',
     :encoding => 'utf8',
-    :database => 'canvas_portal',
-    :username => 'root',
-    :password => 'swordfish'
+    :database => CONFIG['database'],
+    :username => CONFIG['database-user'],
+    :password => CONFIG['user-password']
 )
 
 class ActionTimes < ActiveRecord::Base

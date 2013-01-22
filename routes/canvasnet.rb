@@ -1,4 +1,9 @@
 class Portal < Sinatra::Application
+
+  def initial_setup
+    Files.remove_files
+  end  
+
   post "/master_canvas_net" do
     Files.remove_files
     branch = 'canvas network master'
@@ -23,6 +28,9 @@ class Portal < Sinatra::Application
       end
     end
     ActionTime.store_action_time('master_canvas_net', execution_time) if Validation.check_error_file
+  end
+
+  post "/canvasnet_patchset" do
   end
 end
 

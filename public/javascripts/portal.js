@@ -2,7 +2,7 @@
 (function() {
 
   $(function() {
-    var $advancedOptionsDropdown, $basicOptionsDropdown, $branchContents, $branches, $errorLogHolder, $loadingDiv, $multiplePatchsetContents, $patchsetContents, $pluginPatchsetContents, $portalForm, $versionModal, branchLinkClickHandler, closePatchset, confirmation, disableBeforeUnload, disableElement, dropdownMessage, dropdownOptionClicked, enableBeforeUnload, enableElement, generateBranchHtml, generatePluginsHtml, hideContents, isUnique, openLoadingScreen, progressbar, sendPost, setDropdownText, setLoadingText, validatePatchset;
+    var $advancedOptionsDropdown, $basicOptionsDropdown, $branchContents, $branches, $canvasnetPatchsetContents, $errorLogHolder, $loadingDiv, $multiplePatchsetContents, $patchsetContents, $pluginPatchsetContents, $portalForm, $versionModal, branchLinkClickHandler, closePatchset, confirmation, disableBeforeUnload, disableElement, dropdownMessage, dropdownOptionClicked, enableBeforeUnload, enableElement, generateBranchHtml, generatePluginsHtml, hideContents, isUnique, openLoadingScreen, progressbar, sendPost, setDropdownText, setLoadingText, validatePatchset;
     $loadingDiv = $('#loading');
     $portalForm = $('#portal_form');
     $branches = $('#branches');
@@ -14,6 +14,7 @@
     $pluginPatchsetContents = $('#plugin_patchset_contents');
     $versionModal = $('#version_modal');
     $errorLogHolder = $('#error_log_holder');
+    $canvasnetPatchsetContents = $('#canvasnet_patchset_contents');
     dropdownMessage = 'What do you want to do?';
     $('#footer_img').effect("highlight", {}, 1500);
     enableBeforeUnload = function() {
@@ -57,7 +58,10 @@
         $multiplePatchsetContents.slideToggle();
       }
       if ($errorLogHolder.is(':visible')) {
-        return $errorLogHolder.slideToggle();
+        $errorLogHolder.slideToggle();
+      }
+      if ($canvasnetPatchsetContents.is(':visible')) {
+        return $canvasnetPatchsetContents.slideToggle();
       }
     };
     dropdownOptionClicked = function(e, elementClicked, dropdown) {
@@ -287,6 +291,16 @@
         return sendPost("/" + action, $patchsetUrl);
       }
     });
+    $('#canvasnet_patchset_form').bind('submit', function(e) {
+      var $patchset, action;
+      action = 'canvasnet_patchset';
+      e.preventDefault();
+      $patchset = $('#canvasnet_patchset');
+      if (validatePatchset($patchset) === 0) {
+        openLoadingScreen(null, action);
+        return sendPost("/" + action, $patchset);
+      }
+    });
     $('#footer_img').popover({
       title: 'Portal Info',
       trigger: 'hover',
@@ -455,7 +469,7 @@
       var action;
       action = 'plugin_canvas_net';
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
-      return $('#canvasnet_patchset_contents').slideToggle();
+      return $canvasnetPatchsetContents.slideToggle();
     });
     $('#multiple_patchsets_option').bind('click', function(e) {
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);

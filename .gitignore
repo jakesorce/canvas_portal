@@ -2,3 +2,4 @@
 *.lock
 .idea/*
 /config/email.yml
+/config/action_times_config.yml

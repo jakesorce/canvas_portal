@@ -358,7 +358,7 @@ end
       end
       checkout_status = `git status 2>&1`
       if checkout_status.include?('Unmerged')
-        write_to_file(BTools::ERROR_FILE, checkout_output)
+        write_to_file(ERROR_FILE, checkout_output)
         reset_branch
         exit! 1
       end

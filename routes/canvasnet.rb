@@ -13,8 +13,9 @@ class Portal < Sinatra::Application
   end
 
   def bundle
-    File.delete('Gemfile.lock')
-    system('bundle update')
+    lock_file = '/home/hudson/udemodo/Gemfile.lock'
+    File.delete(lock_file) if File.exists? lock_file
+    system("#{ONE_EIGHT_SHELL} bundle update'")
   end
 
   def swap_files_start
@@ -52,6 +53,7 @@ class Portal < Sinatra::Application
   post "/canvasnet_patchset" do
     Files.remove_files
     patchset = params.keys[0]
+    exit! 1 if Validation.validate_patchset(patchset) == nil
     Writer.write_info(patchset)
     Writer.write_file(PATCHSET_FILE, patchset)
     net_pids = '/home/hudson/udemodo/tmp/pids/delayed_job.pid'
@@ -64,7 +66,7 @@ class Portal < Sinatra::Application
       dcm_courses_jobs
       swap_files_start  
     end
-    ActionTime.store_action_time('canvasnet_patchset' execution_time) if Validation.check_error_file
+    ActionTime.store_action_time('canvasnet_patchset', execution_time) if Validation.check_error_file
   end
 end
 

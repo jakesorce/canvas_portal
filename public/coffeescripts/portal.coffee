@@ -53,7 +53,7 @@ $ ->
   validatePatchset = (patchsetElement) ->
     isValid = 0
     if patchsetElement.val().length > 0
-      digitRegex = digitRegEx = /\d+\/\d+\/\d+/
+      digitRegEx = /^\d+\/\d+\/\d+$/
       pattern = new RegExp(digitRegEx)
       if pattern.test(patchsetElement.val()) is false
         alert('invalid patchset')

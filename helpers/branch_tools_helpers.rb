@@ -22,7 +22,7 @@ module BTools
   end
   
   def BTools.clear_log_files
-    system('rm -rf log/*.log')
+    FileUtils.rm_rf('log/*.log')
   end
   
   def BTools.recreate_cassandra_keyspace
@@ -60,21 +60,20 @@ module BTools
   end
   
   def BTools.bundle
-    File.delete('/home/hudson/canvas-lms/Gemfile.lock')
+    FileUtils.rm_rf('/home/hudson/canvas-lms/Gemfile.lock')
     system('bundle update')
   end
 
  def BTools.create_migrate_assets(drop = false)
   if drop
-    `bundle exec rake db:drop`
-    `bundle exec rake db:create`
+    drop_create_output = `bundle exec rake db:drop db:create`
+    check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:drop or db:create: #{drop_create_output}")
     create_pg_extension
-    `bundle exec rake db:migrate`
-    `bundle exec rake canvas:compile_assets[false]`
+    m_assets_output = `bundle exec rake db:migrate canvas:compile_assets[false]`
+    check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{m_assets_output}")
   else
-    `bundle exec rake db:create`
-    `bundle exec rake db:migrate`
-    `bundle exec rake canvas:compile_assets`
+    c_m_assets_output = `bundle exec rake db:create db:migrate canvas:compile_assets[false]`
+    check_for_error($?, "use advanced option 'View Server Log' for more info -- #{c_m_assets_output}")
   end
 end
 
@@ -92,7 +91,6 @@ end
     else
       create_migrate_assets
     end
-    check_for_error($?.exitstatus)
     post_setup if setup
   end
   
@@ -100,8 +98,8 @@ end
     File.open(file, "w") { |file| file.write(content) }
   end
   
-  def BTools.check_for_error(exit_status, error_content = "error")
-    if exit_status == 1
+  def BTools.check_for_error(exit_status, error_content = "error: use advanced option 'View Server Log' for more info")
+    if exit_status.to_i != 0
       write_to_file(ERROR_FILE, error_content)
       reset_branch
       exit! 1
@@ -122,13 +120,13 @@ end
   end
 
   def BTools.reset_branch
-    system('rm /home/hudson/canvas-lms/.git/rebase-apply')
+    FileUtils.rm_rf('/home/hudson/canvas-lms/.git/rebase-apply')
     system("git reset --hard origin/master")
     system('git checkout master')
   end
   
   def BTools.reset_branch_options(options)
-    system('rm /home/hudson/canvas-lms/.git/rebase-apply')
+    FileUtils.rm_rf('/home/hudson/canvas-lms/.git/rebase-apply')
     options[:branch_name] == 'master' ? system("git reset --hard origin/master") : system("git reset --hard")
   end
   
@@ -160,7 +158,7 @@ end
   end
   
   def BTools.remove_plugin(plugin)
-    FileUtils.rm_r("vendor/plugins/#{plugin}")
+    FileUtils.rm_rf("vendor/plugins/#{plugin}")
     remove_demo_site_symlinks if plugin == 'demo_site'
   end
 
@@ -179,9 +177,9 @@ end
   end
   
   def BTools.remove_all_plugins
-    FileUtils.rm_r("vendor/plugins/analytics")
-    FileUtils.rm_r("vendor/QTIMigrationTool")
-    VENDOR_PLUGINS.each { |plugin| FileUtils.rm_r("vendor/plugins/#{plugin}") }
+    FileUtils.rm_rf("vendor/plugins/analytics")
+    FileUtils.rm_rf("vendor/QTIMigrationTool")
+    VENDOR_PLUGINS.each { |plugin| FileUtils.rm_rf("vendor/plugins/#{plugin}") }
     remove_analytics_symlinks
     remove_demo_site_symlinks
     puts "all plugins removed"
@@ -192,16 +190,16 @@ end
   end
   
   def BTools.remove_analytics_symlinks
-    FileUtils.rm_r("app/views/jst/plugins/analytics")
-    FileUtils.rm_r("public/plugins/analytics")
-    FileUtils.rm_r("public/javascripts/plugins/analytics")
-    FileUtils.rm_r("public/optimized/plugins/analytics")
+    FileUtils.rm_rf("app/views/jst/plugins/analytics")
+    FileUtils.rm_rf("public/plugins/analytics")
+    FileUtils.rm_rf("public/javascripts/plugins/analytics")
+    FileUtils.rm_rf("public/optimized/plugins/analytics")
   end
   
   def BTools.remove_demo_site_symlinks
-    FileUtils.rm_r("public/plugins/demo_site")
-    FileUtils.rm_r("public/javascripts/plugins/demo_site")
-    FileUtils.rm_r("public/optimized/plugins/demo_site")
+    FileUtils.rm_rf("public/plugins/demo_site")
+    FileUtils.rm_rf("public/javascripts/plugins/demo_site")
+    FileUtils.rm_rf("public/optimized/plugins/demo_site")
   end
   
   def BTools.kill_database_connections
@@ -228,7 +226,7 @@ end
     kill_database_connections
     migrate_output = `bundle exec rake db:migrate`
     if migrate_output.include?("rake aborted")
-      write_to_file(ERROR_FILE, "migration error: #{migrate_output}")
+      write_to_file(ERROR_FILE, "use advanced option 'View Server Log' for more info -- migration error: #{migrate_output}")
       exit! 1
     end
     if load_initial_data

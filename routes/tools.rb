@@ -23,7 +23,7 @@ class Portal < Sinatra::Application
 
   post "/apache_server/:action" do |action|
     execution_time = Benchmark.realtime do
-      Writer.write_info('start server')
+      Writer.write_info('start server') if action == 'start'
       system("sudo service apache2 #{action}")
     end
     ActionTime.store_action_time('start_server', execution_time) if Validation.check_error_file

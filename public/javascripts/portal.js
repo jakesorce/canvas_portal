@@ -70,10 +70,10 @@
       return setDropdownText(dropdown, elementClicked.text());
     };
     validatePatchset = function(patchsetElement) {
-      var digitRegEx, digitRegex, isValid, pattern;
+      var digitRegEx, isValid, pattern;
       isValid = 0;
       if (patchsetElement.val().length > 0) {
-        digitRegex = digitRegEx = /\d+\/\d+\/\d+/;
+        digitRegEx = /^\d+\/\d+\/\d+$/;
         pattern = new RegExp(digitRegEx);
         if (pattern.test(patchsetElement.val()) === false) {
           alert('invalid patchset');

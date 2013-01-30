@@ -30,7 +30,7 @@ module BTools
     system('cassandra-cli -f /home/hudson/files/cassandra.txt')
   end
   
-  def BTools.create_pg_extenstion
+  def BTools.create_pg_extension
     `sudo -su postgres psql -d canvas_development -c "CREATE EXTENSION pg_trgm"`
   end
   
@@ -73,7 +73,7 @@ module BTools
     check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{m_assets_output}")
   else
     c_m_assets_output = `bundle exec rake db:create db:migrate canvas:compile_assets[false]`
-    check_for_error($?, "use advanced option 'View Server Log' for more info -- #{c_m_assets_output}")
+    check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{c_m_assets_output}")
   end
 end
 

@@ -36,4 +36,22 @@ class Portal < Sinatra::Application
     end
     ActionTime.store_action_time('shutdown', execution_time)
   end
+
+  post '/restart_jobs_canvas' do
+    execution_time = Benchmark.realtime do
+      Writer.write_info('restart jobs canvas')
+      Dir.chdir('/home/hudson/canvas-lms') { system('bundle update && bundle exec script/delayed_job restart') }
+      system('sudo service apache2 start')
+    end  
+    ActionTime.store_action_time('restart_jobs_canvas', execution_time)
+  end
+
+  post '/restart_jobs_canvasnet' do
+    execution_time = Benchmark.realtime do
+      Writer.write_info('restart jobs canvasnet')
+      Dir.chdir('/home/hudson/udemodo') { system("#{ONE_EIGHT_SHELL} bundle update && bundle exec script/delayed_job restart'") }
+      system('sudo service apache2 start')
+    end
+    ActionTime.store_action_time('restart_jobs_canvasnet', execution_time)
+  end
 end

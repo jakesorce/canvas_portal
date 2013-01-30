@@ -8,19 +8,14 @@ module ActionTime
 end
 
 module Writer
-  def write_response(file)
-    response.write(File.open(file).gets)
-  end
-  
   def write_file(file_path, contents)
-    File.open(file_path, "w") { |file| file.write(contents) }
+    File.open(file_path, "w+") { |file| file.write(contents) }
   end
 
   def write_info(action)
     Time.zone = ActiveSupport::TimeZone[-7].name
     write_file(INFO_FILE, "#{Time.zone.now.strftime("%m/%d/%Y at %I:%M%p")}\n#{action}")
   end
-  module_function :write_response
   module_function :write_file
   module_function :write_info 
 end

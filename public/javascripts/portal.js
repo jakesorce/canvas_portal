@@ -447,6 +447,17 @@
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
     });
+    $('#restart_jobs_canvas').bind('click', function(e) {
+      var action;
+      action = 'restart_jobs_canvas';
+      dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
+      if (confirmation("Really restart jobs for Canvas LMS? This option assumes that you are on a branch of Canvas LMS. If you aren't sure what branch you are on, click cancel and hover over the canvas logo at the bottom")) {
+        openLoadingScreen('Restarting Jobs Canvas...', action);
+        return sendPost("/" + action, null);
+      } else {
+        return setDropdownText($advancedOptionsDropdown, dropdownMessage);
+      }
+    });
     $('#view_error_log').bind('click', function(e) {
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       $.get('/error_log', function(data) {
@@ -470,6 +481,17 @@
       action = 'plugin_canvas_net';
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       return $canvasnetPatchsetContents.slideToggle();
+    });
+    $('#restart_jobs_canvasnet').bind('click', function(e) {
+      var action;
+      action = 'restart_jobs_canvasnet';
+      dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
+      if (confirmation("Really restart jobs for Canvas Network? This option assumes that you are on a branch of Canvas Network. If you aren't sure what branch you are on, click cancel and hover over the canvas logo at the bottom")) {
+        openLoadingScreen('Restarting Jobs Canvasnet...', action);
+        return sendPost("/" + action, null);
+      } else {
+        return setDropdownText($advancedOptionsDropdown, dropdownMessage);
+      }
     });
     $('#multiple_patchsets_option').bind('click', function(e) {
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);

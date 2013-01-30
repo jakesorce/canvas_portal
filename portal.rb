@@ -37,19 +37,20 @@ end
 class Portal < Sinatra::Application
   register Sinatra::Minify
   helpers Sinatra::HtmlHelpers
-   
+ 
   set :js_path, 'public/javascripts'
   set :js_url, '/javascripts'
 
   before do
-    Writer.write_file(GENERATION_FILE, 'generating') if ROUTES.include? request.path_info.split('/')[1]
+   #Writer.write_file(GENERATION_FILE, 'generating') if ROUTES.include?(request.path_info.split('/')[1])
   end
 
   after do
-    File.delete(GENERATION_FILE) if File.exists? GENERATION_FILE if ROUTES.include? request.path_info.split('/')[1]
+    #File.delete(GENERATION_FILE) if ROUTES.include?(request.path_info.split('/')[1])
     unless Validation.check_error_file
       status 400
       response.write(File.open(ERROR_FILE).gets)
+      File.delete(ERROR_FILE)
     end 
   end
 end

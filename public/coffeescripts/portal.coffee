@@ -335,6 +335,15 @@ $ ->
       sendPost("/#{action}", null)
     else
       setDropdownText($advancedOptionsDropdown, dropdownMessage)
+   
+  $('#restart_jobs_canvas').bind 'click', (e) ->
+    action = 'restart_jobs_canvas'
+    dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
+    if confirmation("Really restart jobs for Canvas LMS? This option assumes that you are on a branch of Canvas LMS. If you aren't sure what branch you are on, click cancel and hover over the canvas logo at the bottom")
+      openLoadingScreen('Restarting Jobs Canvas...', action)
+      sendPost("/#{action}", null)
+    else
+      setDropdownText($advancedOptionsDropdown, dropdownMessage)
 
   $('#view_error_log').bind 'click', (e) ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
@@ -355,6 +364,15 @@ $ ->
     action = 'plugin_canvas_net'
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
     $canvasnetPatchsetContents.slideToggle()
+
+  $('#restart_jobs_canvasnet').bind 'click', (e) ->
+    action = 'restart_jobs_canvasnet'
+    dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
+    if confirmation("Really restart jobs for Canvas Network? This option assumes that you are on a branch of Canvas Network. If you aren't sure what branch you are on, click cancel and hover over the canvas logo at the bottom")
+      openLoadingScreen('Restarting Jobs Canvasnet...', action)
+      sendPost("/#{action}", null)
+    else
+      setDropdownText($advancedOptionsDropdown, dropdownMessage)
  
   $('#multiple_patchsets_option').bind 'click', (e) ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)

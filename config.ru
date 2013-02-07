@@ -1,4 +1,4 @@
-require './portal'
+require File.expand_path(File.dirname(__FILE__) + '/portal')
 require 'rack/contrib'
 
 use Rack::Deflater

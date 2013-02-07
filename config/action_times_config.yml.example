@@ -1,3 +1,7 @@
-database: databasename
-database-user: username
-user-password: password
+action-times:
+  database: databasename
+  adapter: mysql2
+  host: localhost
+  encoding: utf8
+  username: username
+  password: password

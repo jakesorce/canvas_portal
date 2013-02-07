@@ -1,3 +1,9 @@
-username: sendgrid username
-password: sendgrid password
-emails: 'test1@example.com, test2@example.com'
+sendgrid: 
+  username: sendgrid username
+  password: sendgrid password
+  emails: 'test1@example.com, test2@example.com'
+  address: smtp.sendgrid.net
+  port: 587
+  domain: domain.com
+  authentication: plain
+  starttls_auto: true

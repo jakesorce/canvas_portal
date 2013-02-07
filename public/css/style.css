@@ -13,6 +13,16 @@ textarea {
 
 #portal_contents {
   padding-top: 15%; }
+  #portal_contents #action_flags {
+    width: 200px;
+    margin-top: 20px;
+    padding: 10px 10px 10px 10px;
+    margin-left: auto;
+    margin-right: auto;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    border: 2px solid silver; }
 
 #version-label {
   padding-top: 6px; }
@@ -54,7 +64,9 @@ textarea {
 
 .action-contents {
   width: 530px;
-  margin: auto auto 10px auto; }
+  margin-bottom: 10px;
+  margin-left: auto;
+  margin-right: auto; }
 
 .center {
   text-align: center; }

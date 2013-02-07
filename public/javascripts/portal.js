@@ -75,7 +75,7 @@
       if (patchsetElement.val().length > 0) {
         digitRegEx = /^\d+\/\d+\/\d+$/;
         pattern = new RegExp(digitRegEx);
-        if (pattern.test(patchsetElement.val()) === false) {
+        if (pattern.test(patchsetElement.val().trim()) === false) {
           alert('invalid patchset');
           patchsetElement.val('');
           isValid = 1;
@@ -137,6 +137,19 @@
     };
     sendPost = function(postUrl, postData) {
       enableBeforeUnload();
+      if ($('#documentation_check').is(':checked')) {
+        postData.push({
+          name: 'doc',
+          value: 'true'
+        });
+      }
+      if ($('#localization_check').is(':checked')) {
+        postData.push({
+          name: 'localization',
+          value: 'true'
+        });
+      }
+      console.log(postData);
       return $.ajax({
         type: 'POST',
         url: postUrl,
@@ -157,9 +170,19 @@
             alert("failed to switch to Ruby version " + postData);
             openLoadingScreen('Reverting version change...', action);
             if (postData === oneEight) {
-              return sendPost("/" + action, oneNine);
+              return sendPost("/" + action, [
+                {
+                  name: 'oneNine',
+                  value: oneNine
+                }
+              ]);
             } else {
-              return sendPost("/" + action, oneEight);
+              return sendPost("/" + action, [
+                {
+                  name: 'oneEight',
+                  value: oneEight
+                }
+              ]);
             }
           } else {
             console.log(data);
@@ -229,26 +252,25 @@
       }
     });
     $portalForm.bind('submit', function(e) {
-      var $patchset, action;
+      var action;
       action = 'checkout';
       e.preventDefault();
-      $patchset = $('#portal_form_patchset');
-      if (validatePatchset($patchset) === 0) {
+      if (validatePatchset($('#portal_form_patchset')) === 0) {
         openLoadingScreen(null, action);
-        return sendPost("/" + action, $patchset.val());
+        return sendPost("/" + action, $(this).serializeArray());
       }
     });
     $('#branch_form').bind('submit', function(e) {
-      var $branchName, action;
+      var action;
       e.preventDefault();
-      $branchName = $('#branch_name').val();
-      if ($branchName === '') {
+      if ($('#branch_name').val() === '') {
         return alert('branch name cannot be empty');
       } else {
         action = 'branch';
         if (confirmation('Checking out a branch will reset your database, do you really want to do this?')) {
+          $('#branch_name').removeAttr('disabled');
           openLoadingScreen(null, action);
-          return sendPost("" + action, $branchName);
+          return sendPost("" + action, $(this).serializeArray());
         } else {
           return setDropdownText($advancedOptionsDropdown, dropdownMessage);
         }
@@ -275,30 +297,33 @@
             return _results;
           })();
           openLoadingScreen(null, action);
-          return sendPost("/" + action, formattedPatchsets.toString());
+          return sendPost("/" + action, [
+            {
+              name: 'patchsets',
+              value: formattedPatchsets.toString()
+            }
+          ]);
         }
       } else {
         return alert('you have the same patchset more than once');
       }
     });
     $('#plugin_form').bind('submit', function(e) {
-      var $patchsetUrl, action;
+      var action;
       action = 'plugin_patchset';
       e.preventDefault();
-      $patchsetUrl = $('#patchset_url');
-      if ($patchsetUrl.val() !== '') {
+      if ($('#patchset_url').val() !== '') {
         openLoadingScreen(null, action);
-        return sendPost("/" + action, $patchsetUrl);
+        return sendPost("/" + action, $(this).serializeArray());
       }
     });
     $('#canvasnet_patchset_form').bind('submit', function(e) {
-      var $patchset, action;
+      var action;
       action = 'canvasnet_patchset';
       e.preventDefault();
-      $patchset = $('#canvasnet_patchset');
-      if (validatePatchset($patchset) === 0) {
+      if (validatePatchset($('#canvasnet_patchset')) === 0) {
         openLoadingScreen(null, action);
-        return sendPost("/" + action, $patchset);
+        return sendPost("/" + action, $(this).serializeArray());
       }
     });
     $('#footer_img').popover({
@@ -317,7 +342,12 @@
       $version = $('#version_text').text().split(' ')[0];
       openLoadingScreen("Switching to " + $version + "...", action);
       $versionModal.modal('hide');
-      return sendPost("/" + action, $version);
+      return sendPost("/" + action, [
+        {
+          name: 'version',
+          value: $version
+        }
+      ]);
     });
     $('#available_branches').bind('click', function(e) {
       var $branchesButton;
@@ -340,13 +370,27 @@
       dropdownOptionClicked(e, $(this), $basicOptionsDropdown);
       return $patchsetContents.slideToggle();
     });
+    $('#action_flags_toggle').bind('click', function(e) {
+      var $actionFlags;
+      $actionFlags = $('#action_flags');
+      e.preventDefault();
+      $actionFlags.slideToggle();
+      if ($actionFlags.is(':visible')) {
+        return $actionFlags.find('input').attr('checked', false);
+      }
+    });
     $('#use_master').bind('click', function(e) {
       var action;
       action = 'branch';
       dropdownOptionClicked(e, $(this), $basicOptionsDropdown);
       if (confirmation('Really use master branch?')) {
         openLoadingScreen(null, action);
-        return sendPost("/" + action, 'master');
+        return sendPost("/" + action, [
+          {
+            name: 'branch',
+            value: 'master'
+          }
+        ]);
       } else {
         return setDropdownText($basicOptionsDropdown, dropdownMessage);
       }
@@ -387,7 +431,7 @@
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation('Really reset database?')) {
         openLoadingScreen('Database resetting...', action);
-        return sendPost("/" + action + "/development", null);
+        return sendPost("/" + action + "/development", []);
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
@@ -405,8 +449,14 @@
       action = 'documentation';
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation('Really genereate documentation?')) {
+        $('#documentation_check').attr('checked', false);
         openLoadingScreen('Documentation generating...', action);
-        return sendPost("/" + action, null);
+        return sendPost("/" + action, [
+          {
+            name: 'doc',
+            value: 'true'
+          }
+        ]);
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
@@ -441,8 +491,14 @@
       action = 'localization';
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation('Validating Localization will run on the current branch, continue?')) {
+        $('#localization_check').attr('checked', false);
         openLoadingScreen('Adding Localization Code...', action);
-        return sendPost("/" + action, null);
+        return sendPost("/" + action, [
+          {
+            name: 'localization',
+            value: 'true'
+          }
+        ]);
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
@@ -453,7 +509,7 @@
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation("Really restart jobs for Canvas LMS? This option assumes that you are on a branch of Canvas LMS. If you aren't sure what branch you are on, click cancel and hover over the canvas logo at the bottom")) {
         openLoadingScreen('Restarting Jobs Canvas...', action);
-        return sendPost("/" + action, null);
+        return sendPost("/" + action, []);
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
@@ -471,7 +527,7 @@
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation('Really change to Canvas Network Master?')) {
         openLoadingScreen('Canvas Network Master...', action);
-        return sendPost("/" + action, null);
+        return sendPost("/" + action, []);
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
@@ -488,7 +544,7 @@
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation("Really restart jobs for Canvas Network? This option assumes that you are on a branch of Canvas Network. If you aren't sure what branch you are on, click cancel and hover over the canvas logo at the bottom")) {
         openLoadingScreen('Restarting Jobs Canvasnet...', action);
-        return sendPost("/" + action, null);
+        return sendPost("/" + action, []);
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
@@ -503,7 +559,7 @@
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation('Do you really want to start the server again? This could result in you having old code and outdated assets. Only do this if you really know what you are doing!')) {
         openLoadingScreen('Starting Server...', action);
-        return sendPost("/apache_server/start", null);
+        return sendPost("/apache_server/start", []);
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
@@ -511,8 +567,9 @@
     $('#one_eight_seven, #one_nine_three').bind('click', function(e) {
       return setDropdownText($('#version_text'), $(this).text());
     });
-    $('#option_toggle_link').bind('click', function() {
+    $('#option_toggle_link').bind('click', function(e) {
       var $optionToggleLink, linkText;
+      e.preventDefault();
       $optionToggleLink = $(this);
       if ($optionToggleLink.text() === 'Advanced Options') {
         setDropdownText($basicOptionsDropdown, dropdownMessage);

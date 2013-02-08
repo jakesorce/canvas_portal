@@ -6,7 +6,8 @@ module Files
   INFO_FILE = "#{Dirs::FILES}/portal_info.txt"
   MULTIPLE_FILE = "#{Dirs::FILES}/multiple.txt"
   GENERATING_FILE = "#{Dirs::FILES}/generating.txt"
-
+  BTOOLS = "#{Dirs::CANVAS}/branch_tools.rb"
+  
   def remove_files(files = [Files::BRANCH_FILE, Files::PATCHSET_FILE, Files::PLUGIN_FILE, Files::MULTIPLE_FILE])
     files.each { |file| File.delete(file) if File.exists? file }
   end

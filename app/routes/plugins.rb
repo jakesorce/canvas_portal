@@ -18,10 +18,10 @@ class Portal < Sinatra::Application
       Writer.write_file(Files::PATCHSET_FILE, plugin_patchset)
       Writer.write_file(Files::PLUGIN_FILE, " - this is a plugin patchset for #{plugin}")
       checkout_command = "#{Tools::GERRIT_URL}/#{plugin} refs/changes#{plugin_patchset} && git checkout FETCH_HEAD"
-      plugin_checkout_values << plugin_patchset + "*"
-      plugin_checkout_values << plugin + "*"
+      plugin_checkout_values << plugin_patchset
+      plugin_checkout_values << plugin
       plugin_checkout_values << checkout_command
-      system("ruby /home/hudson/canvas-lms/branch_tools.rb -p '#{plugin_checkout_values.join}'")
+      Tools.btools_command(plugin_checkout_values.join('*'))
     end
   end
 end

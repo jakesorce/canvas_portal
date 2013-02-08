@@ -5,7 +5,7 @@ class Portal < Sinatra::Application
     Writer.write_info('patchset checkout')
     Writer.write_file(Files::PATCHSET_FILE, patchset)
     checkout_command = "git fetch #{Tools::GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git checkout FETCH_HEAD"
-    system("ruby /home/hudson/canvas-lms/branch_tools.rb -c '#{checkout_command}'")
+    Tools.btools_command(params)
   end
 
   post "/checkout_multiple" do
@@ -13,6 +13,7 @@ class Portal < Sinatra::Application
     patchsets.split('*').each { |patchset| Validation.validate_patchset(patchset) }
     Writer.write_info('multiple patchset checkout')
     Writer.write_file(Files::MULTIPLE_FILE, patchsets)
-    system("ruby /home/hudson/canvas-lms/branch_tools.rb -m '#{patchsets}'")
+    Writer.write_file('/home/hudson/params.txt', params)
+    Tools.btools_command(params)
   end
 end

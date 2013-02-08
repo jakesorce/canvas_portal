@@ -3,9 +3,9 @@ module Version
     `rbenv global`
   end
 
-  def change_version(version)
-    system("rbenv global #{version} && rbenv rehash")
-    system("bash -lc 'rbenv shell #{version} && rbenv rehash && ruby /home/hudson/canvas-lms/branch_tools.rb -v #{version}'")
+  def change_version(params)
+    #system("rbenv global #{version} && rbenv rehash")
+    params.values.first == "1.9.3-p286" ? one_nine_command(Tools.btools_command(params)) : one_eight_command(Tools.btools_command(params))
   end
   module_function :global
   module_function :change_version

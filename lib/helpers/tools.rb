@@ -24,6 +24,17 @@ module Tools
   def restart_jobs(dir, one_eight = false)
     Dir.chdir(dir) { one_eight ? one_eight_command('bundle update && bundle exec script/delayed_job restart') : system('bundle update && bundle exec script/delayed_jobs restart') }
   end
+  
+  def btools_command(params, flag = '-d')
+    values = []
+    action = params.keys.first
+    value = params.values.first
+    doc = 'doc' if params.has_key?('doc')
+    localization = 'localization' if params.has_key?('localization')
+    values << action << value << doc << localization
+    system("ruby #{Files::BTOOLS} #{flag} '#{values.join(',')}'")
+  end
+  module_function :btools_command
   module_function :one_eight_command
   module_function :one_nine_command
   module_function :apache_server

@@ -1,3 +1,26 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require '/home/hudson/portal/lib/helpers/branch_tools_helpers.rb'
+
+options = {}
+action = ''
+optparse = OptionParser.new do |opts|
+  opts.on('-d', '--default action', 'pass it a , delimited string of params: example "branch, master, true, true"') do |params|
+    values = params.split(',')
+    options[:action] = values[0]
+    options[:value] = values[1]
+    options[:docs] = true if values.include?('doc')
+    options[:localization] = true if values.include?('localization')
+  end
+
+  opts.on('-h', '--help', 'Display this screen') do
+    puts opts
+    exit
+  end
+end
+
+optparse.parse!
+
 ENV["HOME"] ||= "/home/hudson/canvas-lms/public" 
 ENV["RAILS_ENV"] = 'development'
 ENV['CANVAS_LMS_ADMIN_EMAIL']='test'
@@ -7,24 +30,24 @@ ENV["CANVAS_LMS_STATS_COLLECTION"]='opt_out'
 
 Dir.chdir('/home/hudson/canvas-lms') do
   BTools.pre_setup
-  case action
-    when 'checkout'
-      BTools.checkout(options[:checkout_url])
-    when 'checkout multiple'
-      BTools.checkout_multiple(options[:patchsets].split(','))
-    when 'dump database'
+  case options[:action]
+    when 'portal_form_patchset'
+      BTools.checkout(options[:value])
+    when 'patchsets'
+      BTools.checkout_multiple(options[:value].split('*'))
+    when 'reset_database'
       BTools.reset_database
-    when 'use master'
-      BTools.canvas_master
-    when 'use branch'
-      BTools.branch(options[:branch_name])
-    when 'generate documentation'
+    when 'branch'
+      value = options[:value]
+      value == 'master' ? BTools.canvas_master : BTools.branch(value) 
+    when 'docs'
       BTools.documentation
-    when 'localize'
+    when 'localization'
       BTools.localize
-    when 'ruby version change'
-      BTools.change_version(options)
+    when 'change_version'
+      BTools.change_version(Git.current_branch)
     when 'plugin patchset'
-      BTools.plugin_patchset(options[:plugin_for_patchset], options[:plugin_checkout_command])
+      value_parts = options[:value].split('*')
+      BTools.plugin_patchset(value_parts[1], value_parts[2])
   end
 end

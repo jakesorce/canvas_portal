@@ -7,6 +7,6 @@ class Portal < Sinatra::Application
     Writer.write_info('branch checkout')
     branch = params.values.first
     Writer.write_file(Files::BRANCH_FILE, branch)
-    system("ruby /home/hudson/canvas-lms/branch_tools.rb -b '#{branch}'")
+    Tools.btools_command(params)
   end
 end

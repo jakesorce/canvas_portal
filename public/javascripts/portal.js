@@ -139,14 +139,14 @@
       enableBeforeUnload();
       if ($('#documentation_check').is(':checked')) {
         postData.push({
-          name: 'doc',
-          value: 'true'
+          name: 'docs',
+          value: true
         });
       }
       if ($('#localization_check').is(':checked')) {
         postData.push({
           name: 'localization',
-          value: 'true'
+          value: true
         });
       }
       console.log(postData);
@@ -300,7 +300,7 @@
           return sendPost("/" + action, [
             {
               name: 'patchsets',
-              value: formattedPatchsets.toString()
+              value: formattedPatchsets.join('*')
             }
           ]);
         }
@@ -431,7 +431,12 @@
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       if (confirmation('Really reset database?')) {
         openLoadingScreen('Database resetting...', action);
-        return sendPost("/" + action + "/development", []);
+        return sendPost("/" + action, [
+          {
+            name: 'reset_database',
+            value: 'development'
+          }
+        ]);
       } else {
         return setDropdownText($advancedOptionsDropdown, dropdownMessage);
       }
@@ -453,8 +458,8 @@
         openLoadingScreen('Documentation generating...', action);
         return sendPost("/" + action, [
           {
-            name: 'doc',
-            value: 'true'
+            name: 'docs',
+            value: true
           }
         ]);
       } else {
@@ -496,7 +501,7 @@
         return sendPost("/" + action, [
           {
             name: 'localization',
-            value: 'true'
+            value: true
           }
         ]);
       } else {

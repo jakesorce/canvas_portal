@@ -101,8 +101,8 @@ $ ->
 
   sendPost = (postUrl, postData) ->
     enableBeforeUnload()
-    postData.push({name: 'doc', value: 'true'}) if $('#documentation_check').is(':checked')
-    postData.push({name: 'localization', value: 'true'}) if $('#localization_check').is(':checked')
+    postData.push({name: 'docs', value: true}) if $('#documentation_check').is(':checked')
+    postData.push({name: 'localization', value: true}) if $('#localization_check').is(':checked')
     console.log(postData)
     $.ajax
       type: 'POST',
@@ -196,7 +196,7 @@ $ ->
       if isValid is 0
         formattedPatchsets = (patchsetValue.value for patchsetValue in $patchsets)
         openLoadingScreen(null, action)
-        sendPost("/#{action}", [{name: 'patchsets', value: formattedPatchsets.toString()}])
+        sendPost("/#{action}", [{name: 'patchsets', value: formattedPatchsets.join('*')}])
     else
       alert('you have the same patchset more than once')
   
@@ -292,7 +292,7 @@ $ ->
     dropdownOptionClicked(e, $(this), $advancedOptionsDropdown)
     if confirmation('Really reset database?')
       openLoadingScreen('Database resetting...', action)
-      sendPost("/#{action}/development", [])
+      sendPost("/#{action}", [{name: 'reset_database', value: 'development'}])
     else
       setDropdownText($advancedOptionsDropdown, dropdownMessage)
 
@@ -310,7 +310,7 @@ $ ->
     if confirmation('Really genereate documentation?')
       $('#documentation_check').attr('checked', false)
       openLoadingScreen('Documentation generating...', action)
-      sendPost("/#{action}", [{name: 'doc', value: 'true'}])
+      sendPost("/#{action}", [{name: 'docs', value: true}])
     else
       setDropdownText($advancedOptionsDropdown, dropdownMessage)
   
@@ -340,7 +340,7 @@ $ ->
     if confirmation('Validating Localization will run on the current branch, continue?')
       $('#localization_check').attr('checked', false)
       openLoadingScreen('Adding Localization Code...', action)
-      sendPost("/#{action}", [{name: 'localization', value: 'true'}])
+      sendPost("/#{action}", [{name: 'localization', value: true}])
     else
       setDropdownText($advancedOptionsDropdown, dropdownMessage)
    

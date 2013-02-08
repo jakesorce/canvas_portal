@@ -10,9 +10,9 @@ class Portal < Sinatra::Application
     response.write(`cat #{Dirs::HUDSON}/logs/sinatra_server_log.txt`)
   end
 
-  post "/dcm_initial_data/:environment" do |environment|
+  post "/dcm_initial_data" do
     Writer.write_info('reset database')
-    system("ruby /home/hudson/canvas-lms/branch_tools.rb -d '#{environment}'")
+    Tools.btools_command(params)
   end
 
   post "/apache_server/:action" do |action|

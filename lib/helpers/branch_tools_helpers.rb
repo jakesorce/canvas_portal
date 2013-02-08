@@ -125,9 +125,9 @@ end
     system('git checkout master')
   end
   
-  def BTools.reset_branch_options(options)
+  def BTools.reset_branch_options(branch)
     FileUtils.rm_rf('/home/hudson/canvas-lms/.git/rebase-apply')
-    options[:branch_name] == 'master' ? system("git reset --hard origin/master") : system("git reset --hard")
+    branch == 'master' ? system("git reset --hard origin/master") : system("git reset --hard")
   end
   
   def BTools.generate_origin_url(origin)
@@ -335,8 +335,8 @@ end
     post_setup(false, true)
   end
 
-  def BTools.change_version(options)
-    reset_branch_options(options)
+  def BTools.change_version(branch)
+    reset_branch_options(branch)
     checkout_all_plugins
     basic_update
     full_update

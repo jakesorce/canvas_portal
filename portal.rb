@@ -32,7 +32,7 @@ class Portal < Sinatra::Application
   set :js_path, 'public/javascripts'
   set :js_url, '/javascripts'
 
-  require_relative 'lib/init'     
+  require_relative 'lib/init'
   require_relative 'app/routes/init'
   
   def route

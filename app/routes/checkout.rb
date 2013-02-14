@@ -4,7 +4,6 @@ class Portal < Sinatra::Application
     Validation.validate_patchset(patchset)
     Writer.write_info('patchset checkout')
     Writer.write_file(Files::PATCHSET_FILE, patchset)
-    checkout_command = "git fetch #{Tools::GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git checkout FETCH_HEAD"
     Tools.btools_command(params)
   end
 

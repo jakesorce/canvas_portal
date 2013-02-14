@@ -125,6 +125,7 @@ $ ->
           console.log(data)
           alert("ajax failure: #{data.responseText}")
           $loadingDiv.close()
+          location.reload()
 
   generateBranchHtml = (branchList) ->
     "<li><a href='#' class='branch_link'>#{branch.trim()}</a></li>" for branch in branchList

@@ -44,15 +44,19 @@ module Sinatra::HtmlHelpers
     error_text = "error occurred on last action, try again"
     no_action_text = "no portal action has taken place"
     patchset_text = Files.first_line(Files::PATCHSET_FILE)
-    action_flags = Files.all_lines(Files::ACTION_FLAGS_FILE)
+    doc_text = 'documentation flag' if File.exists? Files::DOCUMENTATION_FILE
+    localization_text = 'localization flag' if File.exists? Files::LOCALIZATION_FILE
+    action_flags = []
+    action_flags << doc_text << localization_text
+    action_flags.compact!
     patchset_html = "<div class='pad-bottom'><h5>Current Patchset:</h5><div id='patchset_info'>#{patchset_text}</div></div>" if patchset_text
-    action_flags_html = "<div class='pad-bottom'><h5>Action Flags Used:</h5><div id='action_flags_info'>#{action_flags.join('- ')}</div></div>" if action_flags
-    dt_last_action, last_action = no_action_text
+    action_flags_html = "<div class='pad-bottom'><h5>Action Flags Used:</h5><div id='action_flags_info'>#{action_flags.join("<br />")}</div></div>" if not action_flags.empty?
+    dt_last_action = last_action = no_action_text
     if File.exists? info_file
       dt_last_action = Files.first_line(info_file)
       last_action = File.readlines(info_file).last
     elsif File.exists? error_file 
-      dt_last_action, last_action = error_text
+      dt_last_action = last_action = error_text
     end
     <<-HTML
       <div id="canvas_state_info" class="invisible">

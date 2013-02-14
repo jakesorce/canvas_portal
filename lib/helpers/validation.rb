@@ -17,9 +17,12 @@ module Validation
   end
 
   def validate_patchset(input)
+    puts "IN HEREREREREREERERRe"
     if /^\d+\/\d+\/\d+$/.match(input) == nil
       Writer.write_file(Files::ERROR_FILE, 'patchset validation failed')
       exit! 1
+    else
+      true
     end
   end
 

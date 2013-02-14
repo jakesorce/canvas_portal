@@ -6,10 +6,12 @@ module Files
   INFO_FILE = "#{Dirs::FILES}/portal_info.txt"
   MULTIPLE_FILE = "#{Dirs::FILES}/multiple.txt"
   GENERATING_FILE = "#{Dirs::FILES}/generating.txt"
-  ACTION_FLAGS_FILE = "#{Dirs::FILES}/action_flags.txt"
+  OLD_BRANCH_FILE = "#{Dirs::FILES}/old_branch.txt"
+  LOCALIZATION_FILE = "#{Dirs::FILES}/localization.txt"
+  DOCUMENTATION_FILE = "#{Dirs::FILES}/documentation.txt"
   BTOOLS = "#{Dirs::CANVAS}/branch_tools.rb"
   
-  def remove_files(files = [BRANCH_FILE, PATCHSET_FILE, PLUGIN_FILE, MULTIPLE_FILE, ACTION_FLAGS_FILE])
+  def remove_files(files = [BRANCH_FILE, PATCHSET_FILE, PLUGIN_FILE, MULTIPLE_FILE, LOCALIZATION_FILE, DOCUMENTATION_FILE])
     files.each { |file| File.delete(file) if File.exists? file }
   end
 

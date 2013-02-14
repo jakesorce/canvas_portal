@@ -186,7 +186,8 @@
           } else {
             console.log(data);
             alert("ajax failure: " + data.responseText);
-            return $loadingDiv.close();
+            $loadingDiv.close();
+            return location.reload();
           }
         }
       });

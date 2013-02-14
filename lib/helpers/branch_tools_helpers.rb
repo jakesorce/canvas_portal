@@ -1,11 +1,10 @@
 require 'fileutils'
+require File.expand_path(File.dirname(__FILE__) + '/dirs')
+require File.expand_path(File.dirname(__FILE__) + '/files')
+require File.expand_path(File.dirname(__FILE__) + '/tools')
+require File.expand_path(File.dirname(__FILE__) + '/writer')
 
 module BTools
-  ERROR_FILE = '/home/hudson/files/error.txt'
-  OLD_BRANCH_FILE = '/home/hudson/files/old_branch.txt'
-  GERRIT_URL = 'ssh://hudson@10.86.151.193/home/gerrit'
-  VENDOR_PLUGINS = %w(canvasnet_registration banner_grade_export_plugin canvas_zendesk_plugin custom_reports demo_site ims_es_importer_plugin instructure_misc_plugin migration_tool multiple_root_accounts phone_home_plugin)
-
   def BTools.basic_update
     system("git fetch")
     system("git rebase origin/master")
@@ -18,7 +17,7 @@ module BTools
   end
   
   def BTools.kill_all_jobs
-    File.open('/home/hudson/canvas-lms/tmp/pids/delayed_jobs_pool.pid').each { |line| system("kill -9 #{line}") }
+    File.open("#{Dirs::CANVAS}/tmp/pids/delayed_jobs_pool.pid").each { |line| system("kill -9 #{line}") }
   end
   
   def BTools.clear_log_files
@@ -26,8 +25,8 @@ module BTools
   end
   
   def BTools.recreate_cassandra_keyspace
-    sleep 5
-    system('cassandra-cli -f /home/hudson/files/cassandra.txt')
+    sleep 5 # just incase cassandra isn't ready
+    system("cassandra-cli -f #{Dirs::FILES}/cassandra.txt")
   end
   
   def BTools.create_pg_extension
@@ -35,7 +34,7 @@ module BTools
   end
   
   def BTools.enable_features
-    require "/home/hudson/canvas-lms/config/environment" unless defined?(RAILS_ROOT)
+    require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
     Setting.set('enable_page_views', 'db')
     Account.default.enable_service(:analytics)
     Setting.set('show_feedback_link', 'true')
@@ -44,23 +43,23 @@ module BTools
     PluginSetting.new(:name => "kaltura", :settings => {"rtmp_domain"=>"rtmp.instructuremedia.com", "kcw_ui_conf"=>"1727883", "domain"=>"www.instructuremedia.com", "user_secret_key"=>"54122449a76ae10409adcefa3148f4b7", "secret_key"=>"ed7eae22d60b82e0b44fb95089ddb228", "player_ui_conf"=>"1727899", "upload_ui_conf"=>"1103", "partner_id"=>"100", "subpartner_id"=>"10000", "resource_domain"=>"www.instructuremedia.com"}).save
   end
   
-  def BTools.replace_files(dev_file = "/home/hudson/files/development.rb")
+  def BTools.replace_files(dev_file = "#{Dirs::FILES}/development.rb")
     package_assets_command = "echo 'package_assets: always' > config/assets.yml.tmp"
     append_assets_file_command = "cat config/assets.yml >> config/assets.yml.tmp"
     move_assets_file_command = "mv config/assets.yml.tmp config/assets.yml"
     system("cp #{dev_file}  config/environments/")
-    File.delete(ERROR_FILE) if File.exists? ERROR_FILE
+    File.delete(Files::ERROR_FILE) if File.exists? Files::ERROR_FILE
     system(package_assets_command)
     system(append_assets_file_command)
     system(move_assets_file_command)
   end
   
   def BTools.delayed_jobs(action = 'start')
-    system("/home/hudson/canvas-lms/script/delayed_job #{action}")
+    system("#{Dirs::CANVAS}/script/delayed_job #{action}")
   end
   
   def BTools.bundle
-    FileUtils.rm_rf('/home/hudson/canvas-lms/Gemfile.lock')
+    FileUtils.rm_rf("#{Dirs::CANVAS}/Gemfile.lock")
     system('bundle update')
   end
 
@@ -79,11 +78,13 @@ end
 
   def BTools.full_update(recreate_database = false, setup = true)
     bundle
-    delete_command_1 = "delete from schema_migrations where version = '20121107163612';"
-    delete_command_2 = "delete from schema_migrations where version = '20121016150454';"
-    system("sudo -u postgres psql -c \"#{delete_command_1}\"")
-    system("sudo -u postgres psql -c \"#{delete_command_2}\"")
-    system("cp /home/hudson/files/portal.rake /home/hudson/canvas-lms/lib/tasks/")
+    #delete_command_1 = "delete from schema_migrations where version = '20121107163612';"
+    #delete_command_2 = "delete from schema_migrations where version = '20121016150454';"
+    #delete_command_3 = "delete from schema_migrations where version = '20120518214904';"
+    #system("sudo -u postgres psql -c \"#{delete_command_1}\"")
+    #system("sudo -u postgres psql -c \"#{delete_command_2}\"")
+    #system("sudo -u postgres psql -c \"#{delete_command_3}\"")
+    system("cp #{Dirs::FILES}/portal.rake #{Dirs::CANVAS}/lib/tasks/")
     if recreate_database
       delayed_jobs('stop')
       kill_database_connections
@@ -94,25 +95,21 @@ end
     post_setup if setup
   end
   
-  def BTools.write_to_file(file, content)
-    File.open(file, "w") { |file| file.write(content) }
-  end
-  
   def BTools.check_for_error(exit_status, error_content = "error: use advanced option 'View Server Log' for more info")
     if exit_status.to_i != 0
-      write_to_file(ERROR_FILE, error_content)
+      Writer.write_file(Files::ERROR_FILE, error_content)
       reset_branch
       exit! 1
     end
   end
   
-  def BTools.apache_action(action)
-    system("sudo service apache2 #{action}")
-  end
-  
   def BTools.load_initial_data
-    require "/home/hudson/canvas-lms/config/environment" unless defined?(RAILS_ROOT)
+    require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
     system('bundle exec rake db:load_initial_data')
+  end
+
+  def BTools.remove_rebase_file
+    FileUtils.rm_rf("#{Dirs::CANVAS}/.git/rebase-apply")
   end
   
   def BTools.generate_documentation
@@ -120,13 +117,13 @@ end
   end
 
   def BTools.reset_branch
-    FileUtils.rm_rf('/home/hudson/canvas-lms/.git/rebase-apply')
+    remove_rebase_file
     system("git reset --hard origin/master")
     system('git checkout master')
   end
   
   def BTools.reset_branch_options(branch)
-    FileUtils.rm_rf('/home/hudson/canvas-lms/.git/rebase-apply')
+    remove_rebase_file
     branch == 'master' ? system("git reset --hard origin/master") : system("git reset --hard")
   end
   
@@ -146,14 +143,14 @@ end
     clone_statement = generate_origin_url(origin)
     if plugin == 'Analytics'
       plugin = 'canvalytics'
-      system("#{clone_statement} #{GERRIT_URL}/#{plugin}.git vendor/plugins/analytics")
+      system("#{clone_statement} #{Tools::GERRIT_URL}/#{plugin}.git vendor/plugins/analytics")
     elsif plugin == 'QTI Migration Tool'
       plugin = 'QTIMigrationTool'
-      system("#{clone_statement} #{GERRIT_URL}/#{plugin}.git vendor/#{plugin}")
+      system("#{clone_statement} #{Tools::GERRIT_URL}/#{plugin}.git vendor/#{plugin}")
     else
       plugin.downcase!
       plugin.gsub!(' ', '_')
-      system("#{clone_statement} #{GERRIT_URL}/#{plugin}.git vendor/plugins/#{plugin}")
+      system("#{clone_statement} #{Tools::GERRIT_URL}/#{plugin}.git vendor/plugins/#{plugin}")
     end
   end
   
@@ -179,7 +176,7 @@ end
   def BTools.remove_all_plugins
     FileUtils.rm_rf("vendor/plugins/analytics")
     FileUtils.rm_rf("vendor/QTIMigrationTool")
-    VENDOR_PLUGINS.each { |plugin| FileUtils.rm_rf("vendor/plugins/#{plugin}") }
+    Tools::GERRIT_FORMATTED_PLUGINS.each { |plugin| FileUtils.rm_rf("vendor/plugins/#{plugin}") }
     remove_analytics_symlinks
     remove_demo_site_symlinks
     puts "all plugins removed"
@@ -217,20 +214,20 @@ end
   def BTools.checkout_all_plugins(do_remove = true, origin = nil)
     remove_all_plugins if do_remove
     clone_statement = generate_origin_url(origin)
-    system("#{clone_statement} #{GERRIT_URL}/canvalytics.git vendor/plugins/analytics")
-    system("#{clone_statement} #{GERRIT_URL}/qti_migration_tool.git vendor/QTIMigrationTool")
-    VENDOR_PLUGINS.each { |plugin| checkout_plugin(plugin, origin) }
+    system("#{clone_statement} #{Tools::GERRIT_URL}/canvalytics.git vendor/plugins/analytics")
+    system("#{clone_statement} #{Tools::GERRIT_URL}/qti_migration_tool.git vendor/QTIMigrationTool")
+    Tools::GERRIT_FORMATTED_PLUGINS.each { |plugin| checkout_plugin(plugin, origin) }
   end
   
   def BTools.database_dcm_initial_data(load_initial_data = true)
     kill_database_connections
     migrate_output = `bundle exec rake db:migrate`
     if migrate_output.include?("rake aborted")
-      write_to_file(ERROR_FILE, "use advanced option 'View Server Log' for more info -- migration error: #{migrate_output}")
+      Writer.write_file(Files::ERROR_FILE, "use advanced option 'View Server Log' for more info -- migration error: #{migrate_output}")
       exit! 1
     end
     if load_initial_data
-      require "/home/hudson/canvas-lms/config/environment" unless defined?(RAILS_ROOT)
+      require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
       system('bundle exec rake db:load_initial_data')
     end
   end
@@ -238,34 +235,44 @@ end
   def BTools.pre_setup
     system('sudo service cassandra restart')
     kill_all_jobs
-    apache_action('stop')
+    Tools.apache_server('stop')
     clear_log_files
     recreate_cassandra_keyspace
   end
 
-  def BTools.post_setup(lid = true, swap_localize_dev_file = false)
+  def BTools.swap_env_file(localize = false)
+    localize ? replace_files("#{Dirs::FILES}/localization/development.rb") : replace_files
+  end
+
+  def BTools.check_action_flags
+    system('bundle exec rake doc:api') if File.exists? Files::DOCUMENTATION_FILE
+    localization = File.exists? Files::LOCALIZATION_FILE
+    localization ? swap_env_file(true) : swap_env_file
+  end
+
+  def BTools.post_setup(lid = true)
+    check_action_flags
     version = `rbenv global`.strip!
-    system("sudo su - root -c 'cat /home/hudson/files/passenger_one_eight.txt > /etc/apache2/httpd.conf'") if version == 'ree-1.8.7-2011.03'
-    system("sudo su - root -c 'cat /home/hudson/files/passenger_one_nine.txt > /etc/apache2/httpd.conf'") if version == '1.9.3-p286'
-    swap_localize_dev_file ? replace_files('/home/hudson/files/localization/development.rb') : replace_files
+    system("sudo su - root -c 'cat #{Dirs::FILES}/passenger_one_eight.txt > /etc/apache2/httpd.conf'") if version == 'ree-1.8.7-2011.03'
+    system("sudo su - root -c 'cat #{Dirs::FILES}/passenger_one_nine.txt > /etc/apache2/httpd.conf'") if version == '1.9.3-p286'
     delayed_jobs
     system('redis-cli flushall')
     enable_features
     load_initial_data if lid
-    apache_action('start')
+    Tools.apache_server('start')
   end
 
   def BTools.checkout(url)
     reset_update_plugins
     `#{url}`
     if $?.exitstatus == 128
-      write_to_file(ERROR_FILE, 'fatal error checking out pathset, are you sure that is the right patchset?')
+      Writer.write_file(Files::ERROR_FILE, 'fatal error checking out pathset, are you sure that is the right patchset?')
       reset_branch
       exit! 1
     end
     checkout_status = `git status 2>&1`
     if checkout_status.include?('Unmerged')
-      write_to_file(ERROR_FILE, checkout_output)
+      Writer.write_file(Files::ERROR_FILE, checkout_output)
       reset_branch
       exit! 1
     end
@@ -275,9 +282,9 @@ end
   def BTools.checkout_multiple(patchsets)
     reset_update_plugins
     patchsets.each do |patchset|
-      `git fetch #{GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git cherry-pick FETCH_HEAD`
+      `git fetch #{Tools::GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git cherry-pick FETCH_HEAD`
       if $?.exitstatus != 0
-        write_to_file(ERROR_FILE, 'there were conflicts checking out one or more of the patchsets, please make sure all patchsets are in the correct order and have all been rebased recently')
+        Writer.write_file(Files::ERROR_FILE, 'there were conflicts checking out one or more of the patchsets, please make sure all patchsets are in the correct order and have all been rebased recently')
         reset_branch
         exit! 1
       end
@@ -292,17 +299,17 @@ end
   end
 
   def BTools.canvas_master
-    reset_database = File.exists? OLD_BRANCH_FILE
+    reset_database = File.exists? Files::OLD_BRANCH_FILE
     reset_update_plugins
     output = `git checkout master`
     if(output.include?('error:'))
-      write_to_file(ERROR_FILE, output)
+      Writer.write_file(Files::ERROR_FILE, output)
       reset_branch
       exit! 1
     end
     if reset_database
       full_update(true)
-      File.delete(OLD_BRANCH_FILE)
+      File.delete(Files::OLD_BRANCH_FILE)
     else
       full_update
     end
@@ -311,12 +318,12 @@ end
   def BTools.branch(branch_name)
     reset_branch
     basic_update
-    write_to_file(OLD_BRANCH_FILE, 'old branch has been checked out')
+    Writer.write_file(Files::OLD_BRANCH_FILE, 'old branch has been checked out')
     checkout_all_plugins(true, branch_name)
     branch_command = "git checkout #{branch_name}"
     output = `#{branch_command}`
     if(output.include?('error:'))
-      write_to_file(ERROR_FILE, output)
+      Writer.write_file(Files::ERROR_FILE, output)
       reset_branch
       exit! 1
     end
@@ -326,13 +333,14 @@ end
   def BTools.documentation
     bundle 
     generate_documentation
-    apache_action('start')
+    check_action_flags
+    Tools.apache_server('start')
   end
  
   def BTools.localize
     checkout_all_plugins
     full_update(false, false)
-    post_setup(false, true)
+    post_setup
   end
 
   def BTools.change_version(branch)
@@ -345,18 +353,18 @@ end
   def BTools.plugin_patchset(plugin, checkout_command)
     reset_update_plugins
     dir_name = 'analytics' if plugin == 'canvalytics'
-    Dir.chdir("/home/hudson/canvas-lms/vendor/plugins/#{dir_name || plugin}") do
+    Dir.chdir("#{Dirs::CANVAS}/vendor/plugins/#{dir_name || plugin}") do
       reset_branch
       basic_update
       `#{checkout_command}`
       if $?.exitstatus == 128
-        write_to_file(ERROR_FILE, "fatal error checking out pathset, are you sure that is the right patchset for #{plugin}?")
+        Writer.write_file(Files::ERROR_FILE, "fatal error checking out pathset, are you sure that is the right patchset for #{plugin}?")
         reset_branch
         exit! 1
       end
       checkout_status = `git status 2>&1`
       if checkout_status.include?('Unmerged')
-        write_to_file(ERROR_FILE, checkout_output)
+        Writer.write_file(Files::ERROR_FILE, checkout_output)
         reset_branch
         exit! 1
       end

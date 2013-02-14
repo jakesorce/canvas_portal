@@ -1,16 +1,26 @@
 #!/usr/bin/env ruby
 require 'optparse'
-require '/home/hudson/portal/lib/helpers/branch_tools_helpers.rb'
+require File.expand_path(File.dirname(__FILE__) + '/../portal/lib/helpers/branch_tools_helpers')
 
+
+def write_action_flags(contents)
+  File.open(File.expand_path(File.dirname(__FILE__) + '/../files/action_flags.txt'), 'a+') { |file| file.puts(contents) }
+end
 options = {}
 action = ''
 optparse = OptionParser.new do |opts|
-  opts.on('-d', '--default action', 'pass it a , delimited string of params: example "branch, master, true, true"') do |params|
+  opts.on('-d', '--default action', 'pass it a , delimited string of params: example "branch, master, localization, docs"') do |params|
     values = params.split(',')
     options[:action] = values[0]
     options[:value] = values[1]
-    options[:docs] = true if values.include?('doc')
-    options[:localization] = true if values.include?('localization')
+    if values.include? 'docs'
+      options[:docs] = true
+      write_action_flags("documentation")
+    end
+    if values.include? 'localization'
+      options[:localization] = true
+      write_action_flags('localization')
+    end
   end
 
   opts.on('-h', '--help', 'Display this screen') do

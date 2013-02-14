@@ -29,7 +29,7 @@ module Tools
     values = []
     action = params.keys.first
     value = params.values.first
-    doc = 'doc' if params.has_key?('doc')
+    doc = 'docs' if params.has_key?('docs')
     localization = 'localization' if params.has_key?('localization')
     values << action << value << doc << localization
     system("ruby #{Files::BTOOLS} #{flag} '#{values.join(',')}'")

@@ -6,9 +6,10 @@ module Files
   INFO_FILE = "#{Dirs::FILES}/portal_info.txt"
   MULTIPLE_FILE = "#{Dirs::FILES}/multiple.txt"
   GENERATING_FILE = "#{Dirs::FILES}/generating.txt"
+  ACTION_FLAGS_FILE = "#{Dirs::FILES}/action_flags.txt"
   BTOOLS = "#{Dirs::CANVAS}/branch_tools.rb"
   
-  def remove_files(files = [Files::BRANCH_FILE, Files::PATCHSET_FILE, Files::PLUGIN_FILE, Files::MULTIPLE_FILE])
+  def remove_files(files = [BRANCH_FILE, PATCHSET_FILE, PLUGIN_FILE, MULTIPLE_FILE, ACTION_FLAGS_FILE])
     files.each { |file| File.delete(file) if File.exists? file }
   end
 
@@ -19,7 +20,17 @@ module Files
   def first_line(file_path)
     File.open(file_path) { |file| file.gets } if File.exists? file_path
   end
+
+  def branch_file
+    File.open(BRANCH_FILE) { |file| file.gets } rescue Dir.chdir("#{Dirs::CANVAS}") { Git.current_branch }
+  end
+   
+  def all_lines(file_path)
+    File.open(file_path) { |file| file.readlines } if File.exists? file_path
+  end
   module_function :first_line
   module_function :remove_files
   module_function :remove_file
+  module_function :branch_file
+  module_function :all_lines
 end

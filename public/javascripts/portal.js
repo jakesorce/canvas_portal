@@ -149,7 +149,6 @@
           value: true
         });
       }
-      console.log(postData);
       return $.ajax({
         type: 'POST',
         url: postUrl,

@@ -9,6 +9,7 @@ require 'active_support/time_with_zone'
 require 'mail'
 require 'yaml'
 require File.expand_path(File.dirname(__FILE__) + '/lib/helpers/html')
+require File.expand_path(File.dirname(__FILE__) + '/lib/helpers/branch_tools_helpers')
 
 ROUTES = %w[branch master_canvas_net canvasnet_patchset checkout checkout_multiple documentation localization plugin_patchset dcm_initial_data apache_server change_version]
 REMOVE_ROUTES = %w[branch master_canvas_net canvasnet_patchset checkout checkout_multiple plugin_patchset]
@@ -22,6 +23,13 @@ Mail.defaults do
                            :authentication => EMAIL['sendgrid']['authentication'],
                            :enable_starttls_auto => EMAIL['sendgrid']['starttls_auto'] }
 end
+
+ENV["HOME"] ||= "/home/hudson/canvas-lms/public"
+ENV["RAILS_ENV"] = 'development'
+ENV['CANVAS_LMS_ADMIN_EMAIL']='test'
+ENV['CANVAS_LMS_ADMIN_PASSWORD']='password'
+ENV['CANVAS_LMS_ACCOUNT_NAME']='QA Testing'
+ENV["CANVAS_LMS_STATS_COLLECTION"]='opt_out'
 
 class Portal < Sinatra::Application
   register Sinatra::Minify

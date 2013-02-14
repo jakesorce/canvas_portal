@@ -1,6 +1,6 @@
 module Writer
-  def write_file(file_path, contents)
-    File.open(file_path, "w+") { |file| file.write(contents) }
+  def write_file(file_path, contents, write_flag = 'w+')
+    File.open(file_path, write_flag) { |file| file.write(contents) }
   end
 
   def write_info(action)

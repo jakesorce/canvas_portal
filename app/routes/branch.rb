@@ -5,8 +5,7 @@ class Portal < Sinatra::Application
 
   post "/branch" do
     Writer.write_info('branch checkout')
-    branch = params.values.first
-    Writer.write_file(Files::BRANCH_FILE, branch)
+    Writer.write_file(Files::BRANCH_FILE, params.values.first)  
     Tools.btools_command(params)
   end
 end

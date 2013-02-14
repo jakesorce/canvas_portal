@@ -103,7 +103,6 @@ $ ->
     enableBeforeUnload()
     postData.push({name: 'docs', value: true}) if $('#documentation_check').is(':checked')
     postData.push({name: 'localization', value: true}) if $('#localization_check').is(':checked')
-    console.log(postData)
     $.ajax
       type: 'POST',
       url: postUrl,

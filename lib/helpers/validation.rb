@@ -15,9 +15,12 @@ module Validation
       return true
     end
   end
-
+  
+  def is_patchset(value)
+    /^\d+\/\d+\/\d+$/.match(value) == nil ? false : true
+  end
+ 
   def validate_patchset(input)
-    puts "IN HEREREREREREERERRe"
     if /^\d+\/\d+\/\d+$/.match(input) == nil
       Writer.write_file(Files::ERROR_FILE, 'patchset validation failed')
       exit! 1
@@ -32,6 +35,7 @@ module Validation
       exit! 1
     end
   end
+  module_function :is_patchset
   module_function :check_error_file
   module_function :validate_patchset
   module_function :validate_gerrit_url

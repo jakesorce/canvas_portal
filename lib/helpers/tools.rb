@@ -34,7 +34,7 @@ module Tools
     values = []
     action = params.keys.first
     value = params.values.first
-    value = checkout_command(value) if Validation.validate_patchset(value)
+    value = checkout_command(value) if Validation.is_patchset(value)
     doc = 'docs' if params.has_key?('docs')
     localization = 'localization' if params.has_key?('localization')
     values << action << value << doc << localization

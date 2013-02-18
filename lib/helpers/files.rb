@@ -11,7 +11,7 @@ module Files
   DOCUMENTATION_FILE = "#{Dirs::FILES}/documentation.txt"
   BTOOLS = "#{Dirs::CANVAS}/branch_tools.rb"
   
-  def remove_files(files = [BRANCH_FILE, PATCHSET_FILE, PLUGIN_FILE, MULTIPLE_FILE, LOCALIZATION_FILE, DOCUMENTATION_FILE])
+  def remove_files(files = [BRANCH_FILE, PATCHSET_FILE, PLUGIN_FILE, MULTIPLE_FILE, LOCALIZATION_FILE, DOCUMENTATION_FILE, ERROR_FILE])
     files.each { |file| File.delete(file) if File.exists? file }
   end
 

@@ -55,12 +55,14 @@ class Portal < Sinatra::Application
     Validation.validate_patchset(patchset)
     Writer.write_info(patchset)
     remove_net_pids
-    database_setup
-    initial_git_setup
-    Tools.one_eight_command("git fetch #{GERRIT_URL}/udemodo refs/changes/#{patchset} && git checkout FETCH_HEAD")
-    bundle
-    dcm_courses_jobs
-    swap_files_start  
+    Dir.chdir("#{Dirs::UDEMODO}") do
+      database_setup
+      initial_git_setup
+      Tools.one_eight_command("git fetch #{Tools::GERRIT_URL}/udemodo refs/changes/#{patchset} && git checkout FETCH_HEAD")
+      bundle
+      dcm_courses_jobs
+      swap_files_start 
+    end 
   end
 end
 

@@ -235,6 +235,14 @@
         return $branches.close();
       });
     };
+    $('#error_file_link').bind('click', function(e) {
+      if (!$errorLogHolder.is(':visible')) {
+        return $.get('/error_file_text', function(data) {
+          $errorLogHolder.text(data);
+          return $errorLogHolder.slideToggle();
+        });
+      }
+    });
     $('#add_patchset').bind('click', function() {
       var patchsetCount, template;
       patchsetCount = $('.patchset:visible').length;

@@ -2,7 +2,7 @@ module Tools
   SUPPORTED_PLUGINS = "Analytics,QTI Migration Tool,Banner Grade Export Plugin,Canvas Zendesk Plugin,Custom Reports,Demo Site,IMS ES Importer Plugin,Instructure Misc Plugin,Migration Tool,Multiple Root Accounts,Phone Home Plugin, Canvasnet Registration"
 
   GERRIT_FORMATTED_PLUGINS = ['analytics', 'QTIMigrationTool', 'banner_grade_export_plugin', 'canvas_zendesk_plugin', 'custom_reports', 'demo_site', 'ims_es_importer_plugin', 'instructure_misc_plugin', 'canvasnet_registration', 'migration_tool', 'multiple_root_accounts', 'phone_home_plugin']
-
+  PLUGINS = ['banner_grade_export_plugin', 'canvas_zendesk_plugin', 'custom_reports', 'demo_site', 'ims_es_importer_plugin', 'instructure_misc_plugin', 'canvasnet_registration', 'migration_tool', 'multiple_root_accounts', 'phone_home_plugin']
   GERRIT_URL = "ssh://hudson@10.86.151.193/home/gerrit"
 
   def one_eight_command(command)
@@ -22,11 +22,10 @@ module Tools
   end
 
   def restart_jobs(dir, one_eight = false)
-    Dir.chdir(dir) { one_eight ? one_eight_command('bundle update && bundle exec script/delayed_job restart') : system('bundle update && bundle exec script/delayed_jobs restart') }
+    Dir.chdir(dir) { one_eight ? one_eight_command('bundle update && bundle exec script/delayed_job restart') : system('bundle update && bundle exec script/delayed_job restart') }
   end
   
   def checkout_command(patchset)
-    puts "IN /HHEHRHEHREHRHERE"
     "git fetch #{Tools::GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git checkout FETCH_HEAD"
   end
   

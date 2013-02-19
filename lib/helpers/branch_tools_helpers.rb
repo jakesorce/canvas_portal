@@ -3,6 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/dirs')
 require File.expand_path(File.dirname(__FILE__) + '/files')
 require File.expand_path(File.dirname(__FILE__) + '/tools')
 require File.expand_path(File.dirname(__FILE__) + '/writer')
+require File.expand_path(File.dirname(__FILE__) + '/git')
 
 module BTools
   def BTools.basic_update
@@ -60,30 +61,24 @@ module BTools
   
   def BTools.bundle
     FileUtils.rm_rf("#{Dirs::CANVAS}/Gemfile.lock")
-    system('bundle update')
+    system('bundle install')
   end
 
- def BTools.create_migrate_assets(drop = false)
-  if drop
-    drop_create_output = `bundle exec rake db:drop db:create`
-    check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:drop or db:create: #{drop_create_output}")
-    create_pg_extension
-    m_assets_output = `bundle exec rake db:migrate canvas:compile_assets[false]`
-    check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{m_assets_output}")
-  else
-    c_m_assets_output = `bundle exec rake db:create db:migrate canvas:compile_assets[false]`
-    check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{c_m_assets_output}")
+  def BTools.create_migrate_assets(drop = false)
+    if drop
+      drop_create_output = `bundle exec rake db:drop db:create`
+      check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:drop or db:create: #{drop_create_output}")
+      create_pg_extension
+      m_assets_output = `bundle exec rake db:migrate canvas:compile_assets[false]`
+      check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{m_assets_output}")
+    else
+      c_m_assets_output = `bundle exec rake db:create db:migrate canvas:compile_assets[false]`
+      check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{c_m_assets_output}")
+    end
   end
-end
 
   def BTools.full_update(recreate_database = false, setup = true)
     bundle
-    #delete_command_1 = "delete from schema_migrations where version = '20121107163612';"
-    #delete_command_2 = "delete from schema_migrations where version = '20121016150454';"
-    #delete_command_3 = "delete from schema_migrations where version = '20120518214904';"
-    #system("sudo -u postgres psql -c \"#{delete_command_1}\"")
-    #system("sudo -u postgres psql -c \"#{delete_command_2}\"")
-    #system("sudo -u postgres psql -c \"#{delete_command_3}\"")
     system("cp #{Dirs::FILES}/portal.rake #{Dirs::CANVAS}/lib/tasks/")
     if recreate_database
       delayed_jobs('stop')
@@ -176,7 +171,7 @@ end
   def BTools.remove_all_plugins
     FileUtils.rm_rf("vendor/plugins/analytics")
     FileUtils.rm_rf("vendor/QTIMigrationTool")
-    Tools::GERRIT_FORMATTED_PLUGINS.each { |plugin| FileUtils.rm_rf("vendor/plugins/#{plugin}") }
+    Tools::PLUGINS.each { |plugin| FileUtils.rm_rf("vendor/plugins/#{plugin}") }
     remove_analytics_symlinks
     remove_demo_site_symlinks
     puts "all plugins removed"
@@ -216,7 +211,7 @@ end
     clone_statement = generate_origin_url(origin)
     system("#{clone_statement} #{Tools::GERRIT_URL}/canvalytics.git vendor/plugins/analytics")
     system("#{clone_statement} #{Tools::GERRIT_URL}/qti_migration_tool.git vendor/QTIMigrationTool")
-    Tools::GERRIT_FORMATTED_PLUGINS.each { |plugin| checkout_plugin(plugin, origin) }
+    Tools::PLUGINS.each { |plugin| checkout_plugin(plugin, origin) }
   end
   
   def BTools.database_dcm_initial_data(load_initial_data = true)
@@ -295,7 +290,7 @@ end
   def BTools.reset_database
     bundle
     database_dcm_initial_data
-    post_setup
+    post_setup(false)
   end
 
   def BTools.canvas_master
@@ -350,8 +345,11 @@ end
     full_update
   end
 
-  def BTools.plugin_patchset(plugin, checkout_command)
+  def BTools.plugin_patchset(value)
     reset_update_plugins
+    values = value.split(' ')
+    plugin = values[2].split('/').last
+    checkout_command = "git fetch #{Tools::GERRIT_URL}/#{plugin} #{values[3]} && git checkout FETCH_HEAD"
     dir_name = 'analytics' if plugin == 'canvalytics'
     Dir.chdir("#{Dirs::CANVAS}/vendor/plugins/#{dir_name || plugin}") do
       reset_branch

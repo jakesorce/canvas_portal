@@ -4,8 +4,9 @@ module Version
   end
 
   def change_version(params)
-    #system("rbenv global #{version} && rbenv rehash")
-    params.values.first == "1.9.3-p286" ? one_nine_command(Tools.btools_command(params)) : one_eight_command(Tools.btools_command(params))
+    version = params.values.first
+    system("rbenv global #{version} && rbenv rehash")
+    version == "1.9.3-p286" ? Tools.one_nine_command(Tools.btools_command(params)) : Tools.one_eight_command(Tools.btools_command(params))
   end
   module_function :global
   module_function :change_version

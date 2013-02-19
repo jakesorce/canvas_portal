@@ -23,6 +23,11 @@
         <%= erb :plugin_patchset %>
         <%= erb :canvasnet_patchset %>
         <a href="#" id="option_toggle_link">Advanced Options</a> - <a href="#" id="action_flags_toggle">Action Flags</a>
+        <% if File.exists? Files::ERROR_FILE %>
+          <div>
+            <a href="#" id="error_file_link">Show Error File Contents</a>
+          </div>
+        <% end %>
         <div id="action_flags" class="invisible">
           <%= erb :action_flags %>
         </div> 

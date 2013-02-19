@@ -12,7 +12,6 @@ class Portal < Sinatra::Application
     patchsets.split('*').each { |patchset| Validation.validate_patchset(patchset) }
     Writer.write_info('multiple patchset checkout')
     Writer.write_file(Files::MULTIPLE_FILE, patchsets)
-    Writer.write_file('/home/hudson/params.txt', params)
     Tools.btools_command(params)
   end
 end

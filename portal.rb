@@ -11,7 +11,6 @@ require 'yaml'
 require File.expand_path(File.dirname(__FILE__) + '/lib/helpers/html')
 
 ROUTES = %w[branch master_canvas_net canvasnet_patchset checkout checkout_multiple documentation localization plugin_patchset dcm_initial_data apache_server change_version]
-REMOVE_ROUTES = %w[branch master_canvas_net canvasnet_patchset checkout checkout_multiple plugin_patchset]
 EMAIL = YAML.load_file(File.expand_path(File.dirname(__FILE__) + '/config/email.yml'))
 Mail.defaults do
   delivery_method :smtp, { :address   => EMAIL['sendgrid']['address'],
@@ -46,7 +45,7 @@ class Portal < Sinatra::Application
   before do
     @start_time = Time.now.to_f
     if correct_route
-      Files.remove_files if REMOVE_ROUTES.include?(route)
+      Files.remove_files
       Writer.write_file(Files::GENERATING_FILE, 'generating')
     end
   end

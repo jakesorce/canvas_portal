@@ -153,6 +153,12 @@ $ ->
       $('#branch_name').val($(@).text())
       $branches.close()
 
+  $('#error_file_link').bind 'click', (e) ->
+    unless $errorLogHolder.is(':visible')
+      $.get('/error_file_text', (data) ->
+        $errorLogHolder.text(data)
+        $errorLogHolder.slideToggle())
+
   $('#add_patchset').bind 'click', ->
     patchsetCount = $('.patchset:visible').length
     unless patchsetCount is 5 

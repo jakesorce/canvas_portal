@@ -4,7 +4,8 @@ class Portal < Sinatra::Application
   end
 
   post "/plugin_patchset" do
-    url = params.values.first
+    values = params.values.first.split('*')
+    url = values.last
     Validation.validate_gerrit_url(url)
     plugin_checkout_values = []
     Writer.write_info('plugin patchset checkout')
@@ -17,11 +18,7 @@ class Portal < Sinatra::Application
       plugin_patchset = url_parts[3].split('changes')[1]
       Writer.write_file(Files::PATCHSET_FILE, plugin_patchset)
       Writer.write_file(Files::PLUGIN_FILE, " - this is a plugin patchset for #{plugin}")
-      checkout_command = "#{Tools::GERRIT_URL}/#{plugin} refs/changes#{plugin_patchset} && git checkout FETCH_HEAD"
-      plugin_checkout_values << plugin_patchset
-      plugin_checkout_values << plugin
-      plugin_checkout_values << checkout_command
-      Tools.btools_command(plugin_checkout_values.join('*'))
+      Tools.btools_command(params)
     end
   end
 end

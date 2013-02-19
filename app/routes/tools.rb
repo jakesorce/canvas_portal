@@ -10,6 +10,10 @@ class Portal < Sinatra::Application
     response.write(`cat #{Dirs::HUDSON}/logs/sinatra_server_log.txt`)
   end
 
+  get "/error_file_text" do
+    response.write(`cat #{Files::ERROR_FILE}`)
+  end
+
   post "/dcm_initial_data" do
     Writer.write_info('reset database')
     Tools.btools_command(params)

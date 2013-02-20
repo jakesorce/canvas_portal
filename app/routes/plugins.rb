@@ -6,7 +6,7 @@ class Portal < Sinatra::Application
   post "/plugin_patchset" do
     values = params.values.first.split('*')
     url = values.last
-    Validation.validate_gerrit_url(url)
+    halt if not Validation.validate_gerrit_url(url)
     plugin_checkout_values = []
     Writer.write_info('plugin patchset checkout')
     url_parts = url.split(' ')

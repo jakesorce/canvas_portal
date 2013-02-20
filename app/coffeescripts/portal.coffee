@@ -154,9 +154,15 @@ $ ->
       $branches.close()
 
   $('#error_file_link').bind 'click', (e) ->
-    unless $errorLogHolder.is(':visible')
+    e.preventDefault()
+    $link = $(@)
+    if $errorLogHolder.is(':visible')
+      $link.text('Show Error File Contents')
+      $errorLogHolder.slideToggle()
+    else
+      $link.text('Hide Error File Contents')
       $.get('/error_file_text', (data) ->
-        $errorLogHolder.text(data)
+        $errorLogHolder.html(data)
         $errorLogHolder.slideToggle())
 
   $('#add_patchset').bind 'click', ->

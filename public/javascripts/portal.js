@@ -236,9 +236,16 @@
       });
     };
     $('#error_file_link').bind('click', function(e) {
-      if (!$errorLogHolder.is(':visible')) {
+      var $link;
+      e.preventDefault();
+      $link = $(this);
+      if ($errorLogHolder.is(':visible')) {
+        $link.text('Show Error File Contents');
+        return $errorLogHolder.slideToggle();
+      } else {
+        $link.text('Hide Error File Contents');
         return $.get('/error_file_text', function(data) {
-          $errorLogHolder.text(data);
+          $errorLogHolder.html(data);
           return $errorLogHolder.slideToggle();
         });
       }

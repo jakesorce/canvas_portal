@@ -61,7 +61,7 @@ module BTools
   
   def BTools.bundle
     FileUtils.rm_rf("#{Dirs::CANVAS}/Gemfile.lock")
-    system('bundle install')
+    system('bundle update')
   end
 
   def BTools.create_migrate_assets(drop = false)
@@ -240,12 +240,12 @@ module BTools
   end
 
   def BTools.check_action_flags
-    system('bundle exec rake doc:api') if File.exists? Files::DOCUMENTATION_FILE
+    generate_documentation if File.exists? Files::DOCUMENTATION_FILE
     localization = File.exists? Files::LOCALIZATION_FILE
-    localization ? swap_env_file(true) : swap_env_file
+    File.exists?(Files::LOCALIZATION_FILE) ? swap_env_file(true) : swap_env_file
   end
 
-  def BTools.post_setup(lid = true)
+  def BTools.post_setup(lid = false)
     check_action_flags
     version = `rbenv global`.strip!
     system("sudo su - root -c 'cat #{Dirs::FILES}/passenger_one_eight.txt > /etc/apache2/httpd.conf'") if version == 'ree-1.8.7-2011.03'
@@ -334,8 +334,7 @@ module BTools
  
   def BTools.localize
     checkout_all_plugins
-    full_update(false, false)
-    post_setup
+    full_update(false)
   end
 
   def BTools.change_version(branch)

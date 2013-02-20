@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 require 'optparse'
 require File.expand_path(File.dirname(__FILE__) + '/../portal/lib/helpers/branch_tools_helpers')
+FILES_BASE = File.expand_path(File.dirname(__FILE__) + '/../files')
 
-
-def write_action_flags(contents)
-  File.open(File.expand_path(File.dirname(__FILE__) + '/../files/action_flags.txt'), 'a+') { |file| file.puts(contents) }
+def write_file(file_path, contents, write_flag = 'a+')
+    File.open(file_path, write_flag) { |file| file.write(contents) }
 end
+
 options = {}
 action = ''
 optparse = OptionParser.new do |opts|
@@ -13,14 +14,8 @@ optparse = OptionParser.new do |opts|
     values = params.split(',')
     options[:action] = values[0]
     options[:value] = values[1]
-    if values.include? 'docs'
-      options[:docs] = true
-      write_action_flags("documentation")
-    end
-    if values.include? 'localization'
-      options[:localization] = true
-      write_action_flags('localization')
-    end
+    write_file("#{FILES_BASE}/documentation.txt", 'docs') if values.include? 'docs'
+    write_file("#{FILES_BASE}/localization.txt", 'localize') if values.include? 'localization'
   end
 
   opts.on('-h', '--help', 'Display this screen') do
@@ -50,14 +45,9 @@ Dir.chdir('/home/hudson/canvas-lms') do
     when 'branch'
       value = options[:value]
       value == 'master' ? BTools.canvas_master : BTools.branch(value) 
-    when 'docs'
-      BTools.documentation
-    when 'localization'
-      BTools.localize
-    when 'change_version'
+    when 'version'
       BTools.change_version(Git.current_branch)
-    when 'plugin patchset'
-      value_parts = options[:value].split('*')
-      BTools.plugin_patchset(value_parts[1], value_parts[2])
+    when 'plugin_patchset'
+      BTools.plugin_patchset(options[:value])
   end
 end

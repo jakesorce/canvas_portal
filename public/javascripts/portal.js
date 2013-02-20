@@ -464,23 +464,6 @@
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       return $pluginPatchsetContents.slideToggle();
     });
-    $('#generate_documentation').bind('click', function(e) {
-      var action;
-      action = 'documentation';
-      dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
-      if (confirmation('Really genereate documentation?')) {
-        $('#documentation_check').attr('checked', false);
-        openLoadingScreen('Documentation generating...', action);
-        return sendPost("/" + action, [
-          {
-            name: 'docs',
-            value: true
-          }
-        ]);
-      } else {
-        return setDropdownText($advancedOptionsDropdown, dropdownMessage);
-      }
-    });
     $('#shutdown_portal').bind('click', function(e) {
       var action;
       action = 'shutdown';
@@ -505,23 +488,6 @@
     $('#change_ruby_version').bind('click', function(e) {
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       return $versionModal.modal('show');
-    });
-    $('#validate_localization').bind('click', function(e) {
-      var action;
-      action = 'localization';
-      dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
-      if (confirmation('Validating Localization will run on the current branch, continue?')) {
-        $('#localization_check').attr('checked', false);
-        openLoadingScreen('Adding Localization Code...', action);
-        return sendPost("/" + action, [
-          {
-            name: 'localization',
-            value: true
-          }
-        ]);
-      } else {
-        return setDropdownText($advancedOptionsDropdown, dropdownMessage);
-      }
     });
     $('#restart_jobs_canvas').bind('click', function(e) {
       var action;

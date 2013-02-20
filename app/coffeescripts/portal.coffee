@@ -316,16 +316,6 @@ $ ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
     $pluginPatchsetContents.slideToggle()
 
-  $('#generate_documentation').bind 'click', (e) ->
-    action = 'documentation'
-    dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
-    if confirmation('Really genereate documentation?')
-      $('#documentation_check').attr('checked', false)
-      openLoadingScreen('Documentation generating...', action)
-      sendPost("/#{action}", [{name: 'docs', value: true}])
-    else
-      setDropdownText($advancedOptionsDropdown, dropdownMessage)
-  
   $('#shutdown_portal').bind 'click', (e) ->
     action = 'shutdown'
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
@@ -346,16 +336,6 @@ $ ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
     $versionModal.modal('show')
 
-  $('#validate_localization').bind 'click', (e) ->
-    action = 'localization'
-    dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
-    if confirmation('Validating Localization will run on the current branch, continue?')
-      $('#localization_check').attr('checked', false)
-      openLoadingScreen('Adding Localization Code...', action)
-      sendPost("/#{action}", [{name: 'localization', value: true}])
-    else
-      setDropdownText($advancedOptionsDropdown, dropdownMessage)
-   
   $('#restart_jobs_canvas').bind 'click', (e) ->
     action = 'restart_jobs_canvas'
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)

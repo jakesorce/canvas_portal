@@ -94,7 +94,7 @@ module BTools
     if exit_status.to_i != 0
       Writer.write_file(Files::ERROR_FILE, error_content)
       reset_branch
-      exit! 1
+      raise error_content
     end
   end
   
@@ -106,11 +106,11 @@ module BTools
   def BTools.remove_rebase_file
     FileUtils.rm_rf("#{Dirs::CANVAS}/.git/rebase-apply")
   end
-  
-  def BTools.generate_documentation
-    system('bundle exec rake doc:api')
-  end
 
+  def BTools.documentation
+    system('bundle exec rake doc:api') 
+  end
+  
   def BTools.reset_branch
     remove_rebase_file
     system("git reset --hard origin/master")
@@ -240,8 +240,7 @@ module BTools
   end
 
   def BTools.check_action_flags
-    generate_documentation if File.exists? Files::DOCUMENTATION_FILE
-    localization = File.exists? Files::LOCALIZATION_FILE
+    documentation if File.exists? Files::DOCUMENTATION_FILE
     File.exists?(Files::LOCALIZATION_FILE) ? swap_env_file(true) : swap_env_file
   end
 
@@ -323,18 +322,6 @@ module BTools
       exit! 1
     end
     full_update(true)
-  end
-
-  def BTools.documentation
-    bundle 
-    generate_documentation
-    check_action_flags
-    Tools.apache_server('start')
-  end
- 
-  def BTools.localize
-    checkout_all_plugins
-    full_update(false)
   end
 
   def BTools.change_version(branch)

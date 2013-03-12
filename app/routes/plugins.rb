@@ -15,7 +15,7 @@ class Portal < Sinatra::Application
       status 400
       response.write("plugin is not in the list of supported plugins, click the '?' button to see what plugins are supported and try again")
     else
-      plugin_patchset = url_parts[3].split('changes')[1]
+      plugin_patchset = url_parts[3].split('changes')[1].gsub!(/^[\/]/,"")
       Writer.write_file(Files::PATCHSET_FILE, plugin_patchset)
       Writer.write_file(Files::PLUGIN_FILE, " - this is a plugin patchset for #{plugin}")
       Tools.btools_command(params)

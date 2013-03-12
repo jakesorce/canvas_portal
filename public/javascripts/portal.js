@@ -250,6 +250,23 @@
         });
       }
     });
+    $('#docs').bind('click', function(e) {
+      var action;
+      action = 'documentation';
+      e.preventDefault();
+      if (confirmation('Really generate documentation?')) {
+        $('#documentation_check').attr('checked', false);
+        openLoadingScreen('Generating Docs...', action);
+        return sendPost("/" + action, [
+          {
+            name: 'documentation',
+            value: 'true'
+          }
+        ]);
+      } else {
+        return setDropdownText($advancedOptionsDropdown, dropdownMessage);
+      }
+    });
     $('#add_patchset').bind('click', function() {
       var patchsetCount, template;
       patchsetCount = $('.patchset:visible').length;
@@ -285,7 +302,7 @@
         if (confirmation('Checking out a branch will reset your database, do you really want to do this?')) {
           $('#branch_name').removeAttr('disabled');
           openLoadingScreen(null, action);
-          return sendPost("" + action, $(this).serializeArray());
+          return sendPost("/" + action, $(this).serializeArray());
         } else {
           return setDropdownText($advancedOptionsDropdown, dropdownMessage);
         }

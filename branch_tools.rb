@@ -36,6 +36,8 @@ ENV["CANVAS_LMS_STATS_COLLECTION"]='opt_out'
 Dir.chdir('/home/hudson/canvas-lms') do
   BTools.pre_setup
   case options[:action]
+    when 'documentation'
+      BTools.documentation
     when 'portal_form_patchset'
       BTools.checkout(options[:value])
     when 'patchsets'

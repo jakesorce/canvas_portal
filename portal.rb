@@ -45,7 +45,6 @@ class Portal < Sinatra::Application
   before do
     @start_time = Time.now.to_f
     if correct_route
-      puts 'fdjakfjdalksfjdslkajfdklsal'
       Files.remove_files
       Writer.write_file(Files::GENERATING_FILE, 'generating')
     end
@@ -60,4 +59,3 @@ class Portal < Sinatra::Application
     end
   end
 end
-

@@ -33,6 +33,8 @@ module Validation
     if /^git fetch ssh:\/\/[a-z0-9]+@[a-z0-9]+.[a-z0-9]+.com:29418\/[a-z0-9]*.*refs\/changes\/\d+\/\d+\/\d+ && git (checkout|cherry-pick) FETCH_HEAD$/.match(input) == nil
       Writer.write_file(Files::ERROR_FILE, 'url validation failed')
       false
+    else
+      true
     end
   end
   module_function :is_patchset

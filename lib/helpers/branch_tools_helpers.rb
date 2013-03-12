@@ -18,7 +18,9 @@ module BTools
   end
   
   def BTools.kill_all_jobs
-    File.open("#{Dirs::CANVAS}/tmp/pids/delayed_jobs_pool.pid").each { |line| system("kill -9 #{line}") }
+    delayed_jobs('stop')
+    sleep 3 #give delayed jobs some time to shutdown
+    File.open("#{Dirs::CANVAS}/tmp/pids/delayed_jobs_pool.pid").each { |line| system("kill -9 #{line}") } #kill any delayed jobs that are still around
   end
   
   def BTools.clear_log_files
@@ -26,7 +28,7 @@ module BTools
   end
   
   def BTools.recreate_cassandra_keyspace
-    sleep 5 # just incase cassandra isn't ready
+    sleep 5 #just incase cassandra isn't ready
     system("cassandra-cli -f #{Dirs::FILES}/cassandra.txt")
   end
   
@@ -84,6 +86,7 @@ module BTools
       delayed_jobs('stop')
       kill_database_connections
       create_migrate_assets(true)
+      enable_features
     else
       create_migrate_assets
     end
@@ -108,7 +111,12 @@ module BTools
   end
 
   def BTools.documentation
-    system('bundle exec rake doc:api') 
+    system('bundle exec rake doc:api')
+    Tools.apache_server('start') 
+  end
+  
+  def BTools.generate_documentation
+    system('bundle exec rake doc:api')
   end
   
   def BTools.reset_branch
@@ -214,7 +222,7 @@ module BTools
     Tools::PLUGINS.each { |plugin| checkout_plugin(plugin, origin) }
   end
   
-  def BTools.database_dcm_initial_data(load_initial_data = true)
+  def BTools.aatabase_dcm_initial_data(load_initial_data = true)
     kill_database_connections
     migrate_output = `bundle exec rake db:migrate`
     if migrate_output.include?("rake aborted")
@@ -240,7 +248,7 @@ module BTools
   end
 
   def BTools.check_action_flags
-    documentation if File.exists? Files::DOCUMENTATION_FILE
+    generate_documentation if File.exists? Files::DOCUMENTATION_FILE
     File.exists?(Files::LOCALIZATION_FILE) ? swap_env_file(true) : swap_env_file
   end
 
@@ -251,7 +259,6 @@ module BTools
     system("sudo su - root -c 'cat #{Dirs::FILES}/passenger_one_nine.txt > /etc/apache2/httpd.conf'") if version == '1.9.3-p286'
     delayed_jobs
     system('redis-cli flushall')
-    enable_features
     load_initial_data if lid
     Tools.apache_server('start')
   end
@@ -289,6 +296,7 @@ module BTools
   def BTools.reset_database
     bundle
     database_dcm_initial_data
+    enable_features
     post_setup(false)
   end
 

@@ -165,6 +165,16 @@ $ ->
         $errorLogHolder.html(data)
         $errorLogHolder.slideToggle())
 
+  $('#docs').bind 'click', (e) ->
+    action = 'documentation'
+    e.preventDefault()
+    if confirmation('Really generate documentation?')
+      $('#documentation_check').attr('checked', false)
+      openLoadingScreen('Generating Docs...', action)
+      sendPost("/#{action}", [{name: 'documentation', value: 'true'}])
+    else
+      setDropdownText($advancedOptionsDropdown, dropdownMessage)
+
   $('#add_patchset').bind 'click', ->
     patchsetCount = $('.patchset:visible').length
     unless patchsetCount is 5 
@@ -192,7 +202,7 @@ $ ->
       if confirmation('Checking out a branch will reset your database, do you really want to do this?')
         $('#branch_name').removeAttr('disabled')
         openLoadingScreen(null, action)
-        sendPost("#{action}", $(@).serializeArray())
+        sendPost("/#{action}", $(@).serializeArray())
       else
         setDropdownText($advancedOptionsDropdown, dropdownMessage)
   

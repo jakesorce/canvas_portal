@@ -7,7 +7,7 @@ module Validation
         from 'Portal V4 <portalv4@instructure.com>'
         subject 'Portal Error'
         html_part do
-          body File.read('/home/hudson/logs/sinatra_server_log.txt')
+          body File.read("#{Dirs::SINATRA_LOGS}/sinatra_server_log.txt")
         end
       end
       return false

@@ -88,6 +88,7 @@
     };
     openLoadingScreen = function(loadingText, action) {
       setLoadingText(loadingText);
+      $('#game').prepend('<iframe src="http://ryanflorence.com/snake" width="800" height="600"></iframe>');
       $loadingDiv.bPopup({
         modalClose: false,
         escClose: false
@@ -117,23 +118,25 @@
     progressbar = function(actionTime) {
       var step;
       console.log(actionTime);
-      step = actionTime / 100;
-      if (step === 0) {
-        $('#progress_info').slideToggle();
-        $('#progressbar').width('100%');
-      } else {
-        setInterval(function() {
-          var $progress, $progressbar, newValue, progressbarWidth;
-          $progressbar = $('#progressbar');
-          $progress = $progressbar.parent();
-          progressbarWidth = ($progressbar.width() / $progress.width()) * 100;
-          if (progressbarWidth < 100) {
-            newValue = progressbarWidth + 1;
-            return $progressbar.width(newValue.toString() + '%');
-          }
-        }, step);
+      if (actionTime !== '') {
+        step = actionTime / 100;
+        if (step === 0) {
+          $('#progress_info').slideToggle();
+          $('#progressbar').width('100%');
+        } else {
+          setInterval(function() {
+            var $progress, $progressbar, newValue, progressbarWidth;
+            $progressbar = $('#progressbar');
+            $progress = $progressbar.parent();
+            progressbarWidth = ($progressbar.width() / $progress.width()) * 100;
+            if (progressbarWidth < 100) {
+              newValue = progressbarWidth + 1;
+              return $progressbar.width(newValue.toString() + '%');
+            }
+          }, step);
+        }
+        return $('#progress_holder').slideToggle();
       }
-      return $('#progress_holder').slideToggle();
     };
     sendPost = function(postUrl, postData) {
       enableBeforeUnload();

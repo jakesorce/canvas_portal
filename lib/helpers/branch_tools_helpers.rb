@@ -33,7 +33,7 @@ module BTools
   end
   
   def BTools.create_pg_extension
-    `sudo -su postgres psql -d canvas_development -c "CREATE EXTENSION pg_trgm"`
+    `sudo -su postgres psql -d canvas_production -c "CREATE EXTENSION pg_trgm"`
   end
   
   def BTools.enable_features
@@ -42,19 +42,20 @@ module BTools
     Account.default.enable_service(:analytics)
     Setting.set('show_feedback_link', 'true')
     Setting.set('enable_page_views', 'cassandra')
-    Account.default.tap { |a| a.settings[:enable_scheduler] = true; a.save }
+    Account.default.tap do |a|
+      a.settings[:enable_scheduler] = true
+      a.settings[:show_scheduler] = true
+      a.save!
+    end
     PluginSetting.new(:name => "kaltura", :settings => {"rtmp_domain"=>"rtmp.instructuremedia.com", "kcw_ui_conf"=>"1727883", "domain"=>"www.instructuremedia.com", "user_secret_key"=>"54122449a76ae10409adcefa3148f4b7", "secret_key"=>"ed7eae22d60b82e0b44fb95089ddb228", "player_ui_conf"=>"1727899", "upload_ui_conf"=>"1103", "partner_id"=>"100", "subpartner_id"=>"10000", "resource_domain"=>"www.instructuremedia.com"}).save
   end
   
-  def BTools.replace_files(dev_file = "#{Dirs::FILES}/development.rb")
-    package_assets_command = "echo 'package_assets: always' > config/assets.yml.tmp"
-    append_assets_file_command = "cat config/assets.yml >> config/assets.yml.tmp"
-    move_assets_file_command = "mv config/assets.yml.tmp config/assets.yml"
-    system("cp #{dev_file}  config/environments/")
+  def BTools.replace_files(options = {})
+    system("echo 'package_assets: always' > config/assets.yml.tmp")
+    system("cat config/assets.yml >> config/assets.yml.tmp")
+    system("mv config/assets.yml.tmp config/assets.yml")
+    system("cp #{options[:file]} config/environments/") unless options.empty?
     File.delete(Files::ERROR_FILE) if File.exists? Files::ERROR_FILE
-    system(package_assets_command)
-    system(append_assets_file_command)
-    system(move_assets_file_command)
   end
   
   def BTools.delayed_jobs(action = 'start')
@@ -71,8 +72,12 @@ module BTools
       drop_create_output = `bundle exec rake db:drop db:create`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:drop or db:create: #{drop_create_output}")
       create_pg_extension
-      m_assets_output = `bundle exec rake db:migrate canvas:compile_assets[false]`
-      check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{m_assets_output}")
+      migrate_output = `bundle exec rake db:migrate`
+      check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate #{migrate_output}")
+      lid_output = `bundle exec rake db:load_initial_data`
+      check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:load_initial_data #{lid_output}") 
+      assets_output = `bundle exec rake canvas:compile_assets[false]`
+      check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with canvas:compile_assets: #{assets_output}")
     else
       c_m_assets_output = `bundle exec rake db:create db:migrate canvas:compile_assets[false]`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{c_m_assets_output}")
@@ -203,15 +208,15 @@ module BTools
   end
   
   def BTools.kill_database_connections
-    drop_command = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='canvas_development';"
-    drop_command_queue = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='canvas_queue_development';"
+    drop_command = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='canvas_production';"
+    drop_command_queue = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='canvas_queue_production';"
     system("sudo -u postgres psql -c \"#{drop_command}\"")
     system("sudo -u postgres psql -c \"#{drop_command_queue}\"")
-    system("psql -U canvas -c 'drop database canvas_development;'")
-    system("psql -U canvas -c 'create database canvas_development;'")
+    system("psql -U canvas -c 'drop database canvas_production;'")
+    system("psql -U canvas -c 'create database canvas_production;'")
     create_pg_extension
-    system("psql -U canvas -c 'drop database canvas_queue_development;'")
-    system("psql -U canvas -c 'create database canvas_queue_development;'")
+    system("psql -U canvas -c 'drop database canvas_queue_production;'")
+    system("psql -U canvas -c 'create database canvas_queue_production;'")
   end
   
   def BTools.checkout_all_plugins(do_remove = true, origin = nil)
@@ -222,7 +227,7 @@ module BTools
     Tools::PLUGINS.each { |plugin| checkout_plugin(plugin, origin) }
   end
   
-  def BTools.aatabase_dcm_initial_data(load_initial_data = true)
+  def BTools.database_dcm_initial_data(load_initial_data = true)
     kill_database_connections
     migrate_output = `bundle exec rake db:migrate`
     if migrate_output.include?("rake aborted")
@@ -244,7 +249,7 @@ module BTools
   end
 
   def BTools.swap_env_file(localize = false)
-    localize ? replace_files("#{Dirs::FILES}/localization/development.rb") : replace_files
+    localize ? replace_files(:file => "#{Dirs::FILES}/localization/production.rb") : replace_files
   end
 
   def BTools.check_action_flags

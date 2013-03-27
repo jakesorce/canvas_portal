@@ -50,7 +50,7 @@ module Sinatra::HtmlHelpers
     action_flags << doc_text << localization_text
     action_flags.compact!
     patchset_html = "<div class='pad-bottom'><h5>Current Patchset:</h5><div id='patchset_info'>#{patchset_text}</div></div>" if patchset_text
-    action_flags_html = "<div class='pad-bottom'><h5>Action Flags Used:</h5><div id='action_flags_info'>#{action_flags.join("<br />")}</div></div>" if not action_flags.empty?
+    action_flags_html = "<div class='pad-bottom'><h5>Action Flags Used On Last Code Changing Action:</h5><div id='action_flags_info'>#{action_flags.join("<br />")}</div></div>" if not action_flags.empty?
     dt_last_action = last_action = no_action_text
     if File.exists? info_file
       dt_last_action = Files.first_line(info_file)

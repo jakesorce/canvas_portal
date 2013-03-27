@@ -27,13 +27,15 @@ end
 optparse.parse!
 
 ENV["HOME"] ||= "/home/hudson/canvas-lms/public" 
-ENV["RAILS_ENV"] = 'development'
+ENV["RAILS_ENV"] = 'production'
 ENV['CANVAS_LMS_ADMIN_EMAIL']='test'
 ENV['CANVAS_LMS_ADMIN_PASSWORD']='password'
 ENV['CANVAS_LMS_ACCOUNT_NAME']='QA Testing'
 ENV["CANVAS_LMS_STATS_COLLECTION"]='opt_out'
 
 Dir.chdir('/home/hudson/canvas-lms') do
+  log_path = 'log'
+  Dir.foreach(log_path) {|f| fn = File.join(log_path, f); File.delete(fn) if f != '.' && f != '..'}
   BTools.pre_setup
   case options[:action]
     when 'documentation'

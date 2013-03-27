@@ -66,6 +66,7 @@ $ ->
 
   openLoadingScreen = (loadingText, action) ->
     setLoadingText(loadingText)
+    $('#game').prepend('<iframe src="http://ryanflorence.com/snake" width="800" height="600"></iframe>')
     $loadingDiv.bPopup
       modalClose: false,
       escClose: false
@@ -84,20 +85,21 @@ $ ->
 
   progressbar = (actionTime) ->
     console.log(actionTime)
-    step = actionTime / 100
-    if step is 0
-      $('#progress_info').slideToggle()
-      $('#progressbar').width('100%')
-    else
-      setInterval ->
-        $progressbar = $('#progressbar')
-        $progress = $progressbar.parent()
-        progressbarWidth = ($progressbar.width() / $progress.width()) * 100
-        if progressbarWidth < 100
-          newValue = (progressbarWidth + 1)
-          $progressbar.width(newValue.toString() + '%')
-      , step
-    $('#progress_holder').slideToggle()
+    unless actionTime == ''
+      step = actionTime / 100
+      if step is 0
+        $('#progress_info').slideToggle()
+        $('#progressbar').width('100%')
+      else
+        setInterval ->
+          $progressbar = $('#progressbar')
+          $progress = $progressbar.parent()
+          progressbarWidth = ($progressbar.width() / $progress.width()) * 100
+          if progressbarWidth < 100
+            newValue = (progressbarWidth + 1)
+            $progressbar.width(newValue.toString() + '%')
+        , step
+      $('#progress_holder').slideToggle()
 
   sendPost = (postUrl, postData) ->
     enableBeforeUnload()

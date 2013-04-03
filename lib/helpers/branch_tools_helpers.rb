@@ -37,6 +37,7 @@ module BTools
   end
   
   def BTools.enable_features
+    system('export RAILS_ENV=production;')
     require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
     Setting.set('enable_page_views', 'db')
     Account.default.enable_service(:analytics)
@@ -69,17 +70,17 @@ module BTools
 
   def BTools.create_migrate_assets(drop = false)
     if drop
-      drop_create_output = `bundle exec rake db:drop db:create`
+      drop_create_output = `RAILS_ENV=production bundle exec rake db:drop db:create`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:drop or db:create: #{drop_create_output}")
       create_pg_extension
-      migrate_output = `bundle exec rake db:migrate`
+      migrate_output = `RAILS_ENV=production bundle exec rake db:migrate`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate #{migrate_output}")
-      lid_output = `bundle exec rake db:load_initial_data`
+      lid_output = `RAILS_ENV=production bundle exec rake db:load_initial_data`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:load_initial_data #{lid_output}") 
-      assets_output = `bundle exec rake canvas:compile_assets[false]`
+      assets_output = `RAILS_ENV=production bundle exec rake canvas:compile_assets[false]`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with canvas:compile_assets: #{assets_output}")
     else
-      c_m_assets_output = `bundle exec rake db:create db:migrate canvas:compile_assets[false]`
+      c_m_assets_output = `RAILS_ENV=production bundle exec rake db:create db:migrate canvas:compile_assets[false]`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{c_m_assets_output}")
     end
   end
@@ -108,7 +109,7 @@ module BTools
   
   def BTools.load_initial_data
     require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
-    system('bundle exec rake db:load_initial_data')
+    system('RAILS_ENV=production bundle exec rake db:load_initial_data')
   end
 
   def BTools.remove_rebase_file
@@ -116,12 +117,12 @@ module BTools
   end
 
   def BTools.documentation
-    system('bundle exec rake doc:api')
+    system('RAILS_ENV=production bundle exec rake doc:api')
     Tools.apache_server('start') 
   end
   
   def BTools.generate_documentation
-    system('bundle exec rake doc:api')
+    system('RAILS_ENV=production bundle exec rake doc:api')
   end
   
   def BTools.reset_branch
@@ -229,14 +230,14 @@ module BTools
   
   def BTools.database_dcm_initial_data(load_initial_data = true)
     kill_database_connections
-    migrate_output = `bundle exec rake db:migrate`
+    migrate_output = `RAILS_ENV=production bundle exec rake db:migrate`
     if migrate_output.include?("rake aborted")
       Writer.write_file(Files::ERROR_FILE, "use advanced option 'View Server Log' for more info -- migration error: #{migrate_output}")
       exit! 1
     end
     if load_initial_data
       require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
-      system('bundle exec rake db:load_initial_data')
+      system('RAILS_ENV=production bundle exec rake db:load_initial_data')
     end
   end
 

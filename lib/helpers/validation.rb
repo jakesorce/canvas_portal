@@ -21,11 +21,11 @@ module Validation
   end
  
   def validate_patchset(input)
-    if /^\d+\/\d+\/\d+$/.match(input) == nil
-      Writer.write_file(Files::ERROR_FILE, 'patchset validation failed')
-      false
+    if is_patchset(input)
+      return true
     else
-      true
+      Writer.write_file(Files::ERROR_FILE, 'patchset validation failed')
+      return false
     end
   end
 

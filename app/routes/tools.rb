@@ -22,7 +22,7 @@ class Portal < Sinatra::Application
   post "/update_domain" do
     `echo -e "production:
       domain: #{params[:ip_address]}
-      ssl: true > #{Dirs::HUDSON}/canvas-lms/config/domain.yml`      
+      ssl: true" > #{Dirs::HUDSON}/canvas-lms/config/domain.yml`      
   end
 
   post "/apache_server/:action" do |action|

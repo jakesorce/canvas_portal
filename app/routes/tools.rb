@@ -19,7 +19,7 @@ class Portal < Sinatra::Application
     Tools.btools_command(params)
   end
 
-  post "/update_domain"
+  post "/update_domain" do
     `echo -e "production:
       domain: #{params[:ip_address]}
       ssl: true > #{Dirs::HUDSON}/canvas-lms/config/domain.yml`      

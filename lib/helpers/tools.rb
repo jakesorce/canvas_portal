@@ -30,6 +30,11 @@ module Tools
   end
   
   def btools_command(params, flag = '-d')
+    if params.has_key?('domain')
+      `echo -e "production:
+        domain: #{params['domain']}
+	ssl: true" > #{Dirs::HUDSON}/canvas-lms/config/domain.yml`
+    end
     values = []
     action = params.keys.first
     value = params.values.first

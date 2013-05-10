@@ -30,7 +30,7 @@ module Validation
   end
 
   def validate_gerrit_url(input)
-    if /^git fetch ssh:\/\/[a-z0-9]+@[a-z0-9]+.[a-z0-9]+.com:29418\/[a-z0-9]*.*refs\/changes\/\d+\/\d+\/\d+ && git (checkout|cherry-pick) FETCH_HEAD$/.match(input) == nil
+    if input !~ /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/\S*\srefs\/changes\/\d+\/\d+\/\d+/ 
       Writer.write_file(Files::ERROR_FILE, 'url validation failed')
       false
     else

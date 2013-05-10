@@ -1,11 +1,6 @@
 class Portal < Sinatra::Application
-  get "/plugins_list" do
-    response.write(Tools::SUPPORTED_PLUGINS)
-  end
-
-  post "/plugin_patchset" do
-    values = params.values.first.split('*')
-    url = values.last
+ 
+  def checkout_plugin(url)
     halt if not Validation.validate_gerrit_url(url)
     plugin_checkout_values = []
     Writer.write_info('plugin patchset checkout')
@@ -20,5 +15,21 @@ class Portal < Sinatra::Application
       Writer.write_file(Files::PLUGIN_FILE, " - this is a plugin patchset for #{plugin}")
       Tools.btools_command(params)
     end
+  end
+  
+  get "/plugins_list" do
+    response.write(Tools::SUPPORTED_PLUGINS)
+  end
+
+  post "/plugin_patchset" do
+    values = params.values.first.split('*')
+    url = values.last
+    checkout_plugin(url)
+  end
+
+  post "/plugin_magic" do
+    url = params[:plugin_patchset]
+    half if not Validation.validate_gerrit_url(params[:plugin_patchset])
+    checkout_plugin(url)
   end
 end

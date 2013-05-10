@@ -35,8 +35,8 @@ module Tools
     `echo "value: #{params.values.first}" >> #{Dirs::HUDSON}/params.txt`
     if params.has_key?('domain')
       `echo "production:
-        domain: #{params['domain']}
-	ssl: true" > #{Dirs::HUDSON}/canvas-lms/config/domain.yml`
+  domain: #{params['domain']}
+  ssl: true" > #{Dirs::HUDSON}/canvas-lms/config/domain.yml`
     end
     values = []
     action = params.keys.first

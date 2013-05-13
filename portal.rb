@@ -11,15 +11,15 @@ require 'yaml'
 require File.expand_path(File.dirname(__FILE__) + '/lib/helpers/html')
 
 ROUTES = %w[branch master_canvas_net canvasnet_patchset checkout checkout_multiple plugin_patchset dcm_initial_data change_version]
-EMAIL = YAML.load_file(File.expand_path(File.dirname(__FILE__) + '/config/email.yml'))
+PORTAL_CONFIG = YAML.load_file(File.expand_path(File.dirname(__FILE__) + '/config/portal.yml'))
 Mail.defaults do
-  delivery_method :smtp, { :address   => EMAIL['sendgrid']['address'],
-                           :port      => EMAIL['sendgrid']['port'],
-                           :domain    => EMAIL['sendgrid']['domain'],
-                           :user_name => EMAIL['sendgrid']['username'],
-                           :password  => EMAIL['sendgrid']['password'],
-                           :authentication => EMAIL['sendgrid']['authentication'],
-                           :enable_starttls_auto => EMAIL['sendgrid']['starttls_auto'] }
+  delivery_method :smtp, { :address   => PORTAL_CONFIG['sendgrid']['address'],
+                           :port      => PORTAL_CONFIG['sendgrid']['port'],
+                           :domain    => PORTAL_CONFIG['sendgrid']['domain'],
+                           :user_name => PORTAL_CONFIG['sendgrid']['username'],
+                           :password  => PORTAL_CONFIG['sendgrid']['password'],
+                           :authentication => PORTAL_CONFIG['sendgrid']['authentication'],
+                           :enable_starttls_auto => PORTAL_CONFIG['sendgrid']['starttls_auto'] }
 end
 
 class Portal < Sinatra::Application

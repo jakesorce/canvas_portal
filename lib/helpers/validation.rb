@@ -1,11 +1,12 @@
 module Validation
   def check_error_file
+    portal_user = PORTAL_CONFIG['portal']['username']
     if File.exists? Files::ERROR_FILE
       File.delete(Files::INFO_FILE) if File.exists? Files::INFO_FILE
       mail = Mail.deliver do
-        to EMAIL['sendgrid']['emails']
-        from 'Portal V4 <portalv4@instructure.com>'
-        subject 'Portal Error'
+        to PORTAL_CONFIG['sendgrid']['emails']
+        from "Portal V4  #{portal_user} <portalv4#{portal_user}@instructure.com>"
+        subject "Portal Error #{portal_user}"
         html_part do
           body File.read("#{Dirs::SINATRA_LOGS}/sinatra_server_log.txt")
         end

@@ -7,3 +7,6 @@ sendgrid:
   domain: domain.com
   authentication: plain
   starttls_auto: true
+
+portal:
+  username: portal name

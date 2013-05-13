@@ -61,6 +61,7 @@ module BTools
   
   def BTools.delayed_jobs(action = 'start')
     system("#{Dirs::CANVAS}/script/delayed_job #{action}")
+    system("#{Dirs::CANVAS}/script/delayed_job run >> #{Dirs::HUDSON}/files/jobs.log 2>&1 &") if action == 'start'
   end
   
   def BTools.bundle

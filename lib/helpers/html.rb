@@ -20,9 +20,6 @@ module Sinatra::HtmlHelpers
     HTML
   end
 
-  def multiple_patchset_form
-  end
-
   def check_with_label(checkbox_id, label_text)
     <<-HTML
       <label class="checkbox">

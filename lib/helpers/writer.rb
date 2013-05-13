@@ -4,7 +4,7 @@ module Writer
   end
 
   def write_info(action)
-    Time.zone = ActiveSupport::TimeZone[-7].name
+    Time.zone = 'America/Denver'
     write_file(Files::INFO_FILE, "#{Time.zone.now.strftime("%m/%d/%Y at %I:%M%p")}\n#{action}")
   end
   module_function :write_file

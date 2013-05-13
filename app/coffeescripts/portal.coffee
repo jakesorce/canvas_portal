@@ -202,7 +202,6 @@ $ ->
     else
       action = 'branch'
       if confirmation('Checking out a branch will reset your database, do you really want to do this?')
-        $('#branch_name').removeAttr('disabled')
         openLoadingScreen(null, action)
         sendPost("/#{action}", $(@).serializeArray())
       else
@@ -316,7 +315,7 @@ $ ->
     dropdownOptionClicked(e, $(this), $advancedOptionsDropdown)
     if confirmation('Really reset database?')
       openLoadingScreen('Database resetting...', action)
-      sendPost("/#{action}", [{name: 'reset_database', value: 'development'}])
+      sendPost("/#{action}", [{name: 'reset_database', value: 'production'}])
     else
       setDropdownText($advancedOptionsDropdown, dropdownMessage)
 

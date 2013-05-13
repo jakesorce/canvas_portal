@@ -303,7 +303,6 @@
       } else {
         action = 'branch';
         if (confirmation('Checking out a branch will reset your database, do you really want to do this?')) {
-          $('#branch_name').removeAttr('disabled');
           openLoadingScreen(null, action);
           return sendPost("/" + action, $(this).serializeArray());
         } else {
@@ -469,7 +468,7 @@
         return sendPost("/" + action, [
           {
             name: 'reset_database',
-            value: 'development'
+            value: 'production'
           }
         ]);
       } else {

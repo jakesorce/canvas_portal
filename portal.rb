@@ -38,22 +38,22 @@ class Portal < Sinatra::Application
     request.path_info.split('/')[1]
   end
   
-  def correct_route
-    ROUTES.include?(request.path_info.split('/')[1])
+  def correct_route?
+    ROUTES.include? route
   end
 
   before do
     @start_time = Time.now.to_f
-    if correct_route
+    if correct_route?
       Files.remove_files
       Writer.write_file(Files::GENERATING_FILE, 'generating')
     end
   end
 
   after do
-    Files.remove_file(Files::GENERATING_FILE) if correct_route
-    ActionTime.store_action_time(route, (Time.now.to_f - @start_time)) if correct_route && Validation.check_error_file
-    if correct_route && Validation.check_error_file == false 
+    Files.remove_file(Files::GENERATING_FILE) if File.exits? Files::GENERATING_FILE
+    ActionTime.store_action_time(route, (Time.now.to_f - @start_time)) if correct_route? && Validation.check_error_file
+    if correct_route? && Validation.check_error_file == false 
       status 400
       response.write(File.open(Files::ERROR_FILE).gets)
     end

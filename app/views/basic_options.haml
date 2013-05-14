@@ -1,0 +1,10 @@
+.row
+  %span.label.label-info.hidden-phone Basic Options:
+  .btn-group
+    %a#basic_option_dropdown_text.btn.dropdown-toggle.span3{"data-toggle" => "dropdown", :href => "#"}
+      What do you want to do? ▾
+    %ul.dropdown-menu
+      %li
+        %a#checkout{:href => "#"} Checkout a Patchset
+      %li
+        %a#use_master{:href => "#"} Use Master Branch

@@ -1,0 +1,48 @@
+!!!
+%html
+  %head
+    %title Canvas Portal
+    %link{:href => "/images/favicon.ico", :rel => "icon", :type => "image/x-icon"}/
+    %meta{:content => "width=device-width, initial-scale=1.0", :name => "viewport"}/
+    %link{:href => "/css/bootstrap-responsive.min.css", :rel => "stylesheet"}/
+    = css_assets 'base'
+  %body
+    .wrapper
+      #portal_contents.center
+        %h1.pad-bottom Canvas Portal
+        #basic_options.pad-bottom
+          = haml :basic_options
+        #advanced_options.invisible.pad-bottom
+          = haml :advanced_options
+        = haml :multiple_patchsets
+        = haml :branch_contents
+        = haml :patchset
+        = haml :plugin_patchset
+        = haml :canvasnet_patchset
+        %a#option_toggle_link{:href => "#"} Advanced Options
+        \-
+        %a#action_flags_toggle{:href => "#"} Action Flags
+        - if File.exists? Files::ERROR_FILE
+          %div
+            %a#error_file_link{:href => "#"} Show Error File Contents
+        #action_flags.invisible
+          %label.label.label-info Use these with any other action:
+          = haml :action_flags
+        %div
+          %textarea#error_log_holder.invisible{:disabled => "disabled"}
+        .push
+    #footer.footer.center.hidden-phone{:rel => "popover"}
+      %img#footer_img{:src => "images/canvas.png"}/
+    = haml :snake_loading_screen
+    = haml :help_popup
+    = haml :plugins_help_popup
+    = haml :branches_list_popup
+    = haml :version_modal
+    = haml :hover_info_popover
+    = haml :patchset_template
+    %script{:src => "//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"}
+    %script{:src => "javascripts/effects.core.min.js", :type => "text/javascript"}
+    %script{:src => "javascripts/effects.highlight.min.js", :type => "text/javascript"}
+    %script{:src => "javascripts/bpopup.min.js", :type => "text/javascript"}
+    %script{:src => "javascripts/bootstrap.min.js", :type => "text/javascript"}
+    %script{:src => "javascripts/base.min.js", :type => "text/javascript"}

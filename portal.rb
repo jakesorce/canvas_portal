@@ -8,6 +8,7 @@ require 'active_support/core_ext/time/zones'
 require 'active_support/time_with_zone'
 require 'mail'
 require 'yaml'
+require 'haml'
 require File.expand_path(File.dirname(__FILE__) + '/lib/helpers/html')
 
 ROUTES = %w[branch master_canvas_net canvasnet_patchset checkout checkout_multiple plugin_patchset dcm_initial_data change_version]

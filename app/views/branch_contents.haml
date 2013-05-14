@@ -1,0 +1,9 @@
+#branch_contents.invisible.action-contents
+  %form#branch_form.form-horizontal{:method => "post"}
+    .control-group
+      %label#branch-name-label.control-label Branch Name:
+      .controls
+        %input#branch_name{:name => "branch", :placeholder => "origin/stable/dev/fft", :readonly => "readonly", :type => "text"}/
+        %button#available_branches.btn.hidden-phone{:type => "button"} Branches
+    %div
+      %input.btn.btn-primary{:name => "submit", :type => "submit", :value => "Generate Environment"}/

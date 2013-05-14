@@ -1,0 +1,19 @@
+#version_modal.modal.hide.fade
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", :type => "button"} ×
+    %h3 Change Ruby Version
+  .modal-body.center
+    %form#version_form.dialog-top.pad-bottom
+      .pad-bottom
+        .btn-group
+          %span.label.label-important
+            Current Version:
+            %span#version_info
+      %label#version-label.span2.offset1 Change Version To:
+      .btn-group
+        %a#version_text.btn.dropdown-toggle.span2{"data-toggle" => "dropdown", :href => "#"}
+          %span.caret
+        %ul#version_select.dropdown-menu
+  .modal-footer
+    %a#close_version_modal.btn{:href => "#"} Close
+    %a#change_version.btn.btn-primary{:href => "#"} Change Version

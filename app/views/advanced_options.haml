@@ -1,0 +1,32 @@
+.row
+  %span.label.label-important.hidden-phone Advanced Options:
+  .btn-group
+    %a#advanced_option_dropdown_text.btn.dropdown-toggle.span3{"data-toggle" => "dropdown", :href => "#"}
+      What do you want to do? ▾
+    %ul.dropdown-menu
+      %li
+        %a#change_ruby_version.hidden-phone{:href => "#"} Change Ruby Version
+      %li
+        %a#branch_checkout{:href => "#"} Checkout a Branch
+      %li
+        %a#multiple_patchsets_option.hidden-phone{:href => "#"} Checkout Multiple Patchsets
+      %li
+        %a#plugin_patchset{:href => "#"} Checkout a Plugin Patchset
+      %li
+        %a#docs{:href => "#"} Generate Documentation
+      %li
+        %a#dump_db{:href => "#"} Reset Database
+      %li
+        %a#restart_jobs_canvas{:href => "#"} Restart Jobs Server Canvas-LMS
+      %li
+        %a#shutdown_portal{:href => "#"} Shut Down Portal
+      %li
+        %a#start_server{:href => "#"} Start Canvas Server
+      %li
+        %a#view_error_log{:href => "#"} View Server Log
+      /
+        <li class="divider"></li>
+        <li><a href="#" id="patchset_canvas_net">Checkout a Patchset Canvas Net</a></li>
+        <li><a href="#" id="master_canvas_net">Use Master Canvas Net</a></li>
+        <li class="disabled"><a href="#" id="multiple_canvas_net">Multiple Patchset Canvas Net</a></li>
+        <li><a href="#" id="restart_jobs_canvasnet">Restart Jobs Server Canvasnet</a></li>

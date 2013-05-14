@@ -1,0 +1,9 @@
+#plugin_patchset_contents.invisible.action-contents
+  %form#plugin_form.form-horizontal{:method => "post"}
+    .control-group
+      %label.control-label Checkout URL:
+      .controls
+        %input#patchset_url{:name => "plugin_patchset", :placeholder => "git fetch ssh://user@gerrit.instructure.com:29418/custom_reports refs/changes/63/15263/1 && git checkout FETCH_HEAD", :required => "", :type => "text"}/
+        %button.plugins_help_button.btn.hidden-phone{:type => "button"} Help?
+    %div
+      %input#generate_environment.btn.btn-primary{:name => "submit", :type => "submit", :value => "Generate Environment"}/

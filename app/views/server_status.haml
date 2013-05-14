@@ -1,0 +1,25 @@
+!!!
+%html
+  %head
+    %title Server Status
+    %link{:href => "/images/favicon.ico", :rel => "icon", :type => "image/x-icon"}/
+    %meta{:content => "width=device-width, initial-scale=1.0", :name => "viewport"}/
+    %link{:href => "/css/bootstrap-responsive.min.css", :rel => "stylesheet"}/
+    = css_assets 'base'
+  %body
+    #server_status.white-readable.invisible
+      %h2
+        Canvas is running, the branch is:
+        %span#canvas_state.center= branch
+        = plugin_info if plugin_info != nil
+      - if patchset != nil
+        = "<div class='center pad-bottom popup-link'><a href='https://gerrit.instructure.com/#/c/#{patchset.split('/')[1]}' target='blank'>#{patchset}</a></div>"
+      - if patchsets != nil
+        - for patchset in patchsets
+          = "<div class='center pad-bottom popup-link'><a href='https://gerrit.instructure.com/#/c/#{patchset.split('/')[1]}' target='blank'>#{patchset}</a></div>"
+      .button-holder
+        %button#canvas.btn{:type => "button"} Go to Canvas
+        %button#portal.btn{:type => "button"} Go to the Portal
+    %script{:src => "//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"}
+    %script{:src => "javascripts/bpopup.min.js", :type => "text/javascript"}
+    %script{:src => "javascripts/server-status.min.js", :type => "text/javascript"}

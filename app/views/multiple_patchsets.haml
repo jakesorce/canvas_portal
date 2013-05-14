@@ -1,0 +1,12 @@
+#multiple_patchset_contents.invisible.action-contents
+  %form#multiple_patchsets.form-horizontal{:method => "post"}
+    #initial_patchset_group.control-group
+      %label.control-label Patchset:
+      .controls
+        %input.patchset{:placeholder => "62/14362/6", :required => "", :type => "text"}/
+        %button.help_button.btn{:type => "button"} Help?
+        %button#add_patchset.btn.pull-right{:type => "button"}
+          %i.icon-plus
+    %span.label.label-important.control-group NOTE: patchsets will be checked out in order from first to last
+    %div
+      %input#generate_environment.btn.btn-primary{:name => "submit", :type => "submit", :value => "Generate Environment"}/

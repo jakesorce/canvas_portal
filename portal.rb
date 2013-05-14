@@ -51,7 +51,7 @@ class Portal < Sinatra::Application
   end
 
   after do
-    Files.remove_file(Files::GENERATING_FILE) if File.exits? Files::GENERATING_FILE
+    Files.remove_file(Files::GENERATING_FILE) if File.exists? Files::GENERATING_FILE
     ActionTime.store_action_time(route, (Time.now.to_f - @start_time)) if correct_route? && Validation.check_error_file
     if correct_route? && Validation.check_error_file == false 
       status 400

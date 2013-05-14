@@ -1,6 +1,7 @@
 #!/bin/bash
 
 git pull --rebase
+bundle update
 
 if [ ! -f ../files/generating.txt ];
 then

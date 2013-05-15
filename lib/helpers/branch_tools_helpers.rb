@@ -129,12 +129,14 @@ module BTools
   def BTools.reset_branch
     remove_rebase_file
     system("git reset --hard origin/master")
+    system("git clean")
     system('git checkout master')
   end
   
   def BTools.reset_branch_options(branch)
     remove_rebase_file
     branch == 'master' ? system("git reset --hard origin/master") : system("git reset --hard")
+    system("git clean")
   end
   
   def BTools.generate_origin_url(origin)

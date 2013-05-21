@@ -289,6 +289,25 @@ module BTools
     full_update
   end
 
+  def BTools.checkout_multiple_plugins(plugins)
+    reset_update_plugins
+    plugins.each do |plugin|
+      plugin_project = plugin.split(":29418/").last.split(" ").first
+      plugin_patchset = plugin.split("changes/").last.split(" ").first
+      target = ''
+      if plugin_project == 'qti_migration_tool'
+        target = 'vendor/'
+        plugin_project = 'QTIMigrationTool'	
+      else
+        target = 'vendor/plugins/'
+      end	
+      Dir.chdir "#{Dirs::CANVAS}/#{target}#{plugin_project}" do 
+      system("git fetch #{Tools::GERRIT_URL}/#{plugin_project} refs/changes/#{plugin_patchset} && git checkout FETCH_HEAD")
+      end     
+    end
+    Tools.apache_server('start')
+  end
+
   def BTools.checkout_multiple(patchsets)
     reset_update_plugins
     patchsets.each do |patchset|

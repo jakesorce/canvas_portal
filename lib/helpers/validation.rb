@@ -30,6 +30,19 @@ module Validation
     end
   end
 
+  def is_plugin(value)
+     /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/\S*\srefs\/changes\/\d+\/\d+\/\d+/.match(value) == nil ? false : true
+  end
+  
+  def validate_plugin(input)
+    if is_plugin(input)
+      return true
+    else
+      Writer.write_file(Files::ERROR_FILE, 'plugin validatoin failed')
+      return false
+    end
+  end
+
   def validate_gerrit_url(input)
     if input !~ /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/\S*\srefs\/changes\/\d+\/\d+\/\d+/ 
       Writer.write_file(Files::ERROR_FILE, 'url validation failed')
@@ -42,4 +55,6 @@ module Validation
   module_function :check_error_file
   module_function :validate_patchset
   module_function :validate_gerrit_url
+  module_function :validate_plugin
+  module_function :is_plugin
 end

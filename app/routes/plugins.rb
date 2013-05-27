@@ -32,4 +32,17 @@ class Portal < Sinatra::Application
     half if not Validation.validate_gerrit_url(params[:plugin_patchset])
     checkout_plugin(url)
   end
+
+  post "/checkout_multiple_plugins" do
+    plugins = params.values.first
+    file_formatted_plugins = []
+    plugins.split('*').each do |plugin| 
+      halt 400 if not Validation.validate_plugin(plugin)
+      file_formatted_plugins << "#{plugin.split('changes/').last.split(' ').first}"
+    end
+
+    Writer.write_info('multiple plugins checkout')
+    Writer.write_file(Files::MULTIPLE_FILE, file_formatted_plugins.join('*'))
+    Tools.btools_command(params)
+  end
 end

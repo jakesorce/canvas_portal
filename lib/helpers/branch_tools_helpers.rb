@@ -133,12 +133,14 @@ module BTools
   def BTools.reset_branch
     remove_rebase_file
     system("git reset --hard origin/master")
+    system("git clean")
     system('git checkout master')
   end
   
   def BTools.reset_branch_options(branch)
     remove_rebase_file
     branch == 'master' ? system("git reset --hard origin/master") : system("git reset --hard")
+    system("git clean")
   end
   
   def BTools.generate_origin_url(origin)
@@ -289,6 +291,25 @@ module BTools
       exit! 1
     end
     full_update
+  end
+
+  def BTools.checkout_multiple_plugins(plugins)
+    reset_update_plugins
+    plugins.each do |plugin|
+      plugin_project = plugin.split(":29418/").last.split(" ").first
+      plugin_patchset = plugin.split("changes/").last.split(" ").first
+      target = ''
+      if plugin_project == 'qti_migration_tool'
+        target = 'vendor/'
+        plugin_project = 'QTIMigrationTool'	
+      else
+        target = 'vendor/plugins/'
+      end	
+      Dir.chdir "#{Dirs::CANVAS}/#{target}#{plugin_project}" do 
+      system("git fetch #{Tools::GERRIT_URL}/#{plugin_project} refs/changes/#{plugin_patchset} && git checkout FETCH_HEAD")
+      end     
+    end
+    Tools.apache_server('start')
   end
 
   def BTools.checkout_multiple(patchsets)

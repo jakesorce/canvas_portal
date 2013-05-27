@@ -7,6 +7,7 @@ $ ->
   $branchContents = $('#branch_contents')
   $patchsetContents = $('#patchset_contents')
   $multiplePatchsetContents = $('#multiple_patchset_contents')
+  $multiplePluginsContents = $('#multiple_plugins_contents')
   $pluginPatchsetContents = $('#plugin_patchset_contents')
   $versionModal = $('#version_modal')
   $errorLogHolder = $('#error_log_holder')
@@ -37,11 +38,18 @@ $ ->
       $(@).parent().parent().remove()
       enableElement($addPatchset) if $addPatchset.is(':disabled') 
 
+  closePlugin = ->
+    $('.remove_plugin').bind 'click', ->
+      $addPlugin = $('#add_plugin')
+      $(@).parent().parent().remove()
+      enableElement($addPlugin) if $addPlugin.is(':disabled') 
+
   hideContents = ->
     $patchsetContents.slideToggle() if $patchsetContents.is(':visible')
     $branchContents.slideToggle() if $branchContents.is(':visible')
     $pluginPatchsetContents.slideToggle() if $pluginPatchsetContents.is(':visible')
     $multiplePatchsetContents.slideToggle() if $multiplePatchsetContents.is(':visible')
+    $multiplePluginsContents.slideToggle() if $multiplePluginsContents.is(':visible')
     $errorLogHolder.slideToggle() if $errorLogHolder.is(':visible')
     $canvasnetPatchsetContents.slideToggle() if $canvasnetPatchsetContents.is(':visible')
    
@@ -49,6 +57,20 @@ $ ->
     hideContents()
     e.preventDefault()
     setDropdownText(dropdown, elementClicked.text())
+
+  validatePlugin = (pluginElement) -> 
+    isValid = 0
+    if pluginElement.val().length > 0
+      regex = /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/\S*\srefs\/changes\/\d+\/\d+\/\d+/
+      pattern = new RegExp(regex)
+      if pattern.test(pluginElement.val().trim()) is false
+        alert('invalid plugin')
+        pluginElement.val('')
+        isValid = 1
+    else
+      alert('cannot have an empty plugin')
+      isValid = 1
+    isValid
 
   validatePatchset = (patchsetElement) ->
     isValid = 0
@@ -131,6 +153,33 @@ $ ->
 
   generateBranchHtml = (branchList) ->
     "<li><a href='#' class='branch_link'>#{branch.trim()}</a></li>" for branch in branchList
+  
+  isValidPlugin = (plugins) ->
+    valid = false
+    regex = /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/[\S]*\S*\srefs\/changes\/\d+\/\d+\/\d+\s&&\sgit\ checkout\sFETCH_HEAD/
+    plugins.each (idx, el) ->
+      valid = regex.test($(el).val())
+    alert('invalid plugin') if !valid
+    valid
+
+  isUniquePlugin = (plugins) ->
+    valid = true
+    projects = []
+    plugins.each (idx, el) -> 
+      console.log("VAL " + $(el).val())
+      project = $(el).val().split(":29418/")[1].split(" ")[0]
+      projects.push(project)
+    
+    projects.sort()
+    last = projects[0]
+    i = 1
+
+    while i < projects.length
+      valid = false if projects[i] is last
+      last = projects[i]
+      i++
+    alert("can't have duplicate plugin patchsets") if !valid  
+    valid
 
   isUnique = (patchsets) ->
     values = []
@@ -188,6 +237,18 @@ $ ->
         $('.additional_patchset:visible:last').after(template)
       closePatchset()
 
+
+  $('#add_plugin').bind 'click', ->
+    pluginCount = $('.plugin_patchset:visible').length
+    unless pluginCount is 5 
+      disableElement($(@)) if pluginCount is 4
+      template = $('#plugin_template').html()
+      if pluginCount is 1
+        $('#initial_plugin_group').after(template)
+      else
+        $('.additional_plugin:visible:last').after(template)
+      closePlugin()
+
   $portalForm.bind 'submit', (e) ->
     action = 'checkout'
     e.preventDefault()
@@ -223,6 +284,19 @@ $ ->
     else
       alert('you have the same patchset more than once')
   
+  $('#multiple_plugins').bind 'submit', (e) ->
+    action = 'checkout_multiple_plugins'
+    e.preventDefault()
+    $plugins = $('.plugin_patchset:visible')
+
+    if $plugins.length == 1
+      alert('this option is for checking out multiple plugin patchsets only')
+    else
+      if isValidPlugin($plugins)  && isUniquePlugin($plugins)
+        formattedPlugins = (pluginValue.value for pluginValue in $plugins)
+        openLoadingScreen(null, action)
+        sendPost("/#{action}", [{name: 'plugins', value: formattedPlugins.join('*')}])
+
   $('#plugin_form').bind 'submit', (e) ->
     action = 'plugin_patchset'
     e.preventDefault()
@@ -389,6 +463,10 @@ $ ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
     $('#multiple_patchset_contents').slideToggle()
  
+  $('#multiple_plugins_option').bind 'click', (e) ->
+    dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
+    $('#multiple_plugins_contents').slideToggle()
+    
   $('#start_server').bind 'click', (e) ->
     action = 'start_server'
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)

@@ -2,7 +2,7 @@
 (function() {
 
   $(function() {
-    var $advancedOptionsDropdown, $basicOptionsDropdown, $branchContents, $branches, $canvasnetPatchsetContents, $errorLogHolder, $loadingDiv, $multiplePatchsetContents, $patchsetContents, $pluginPatchsetContents, $portalForm, $versionModal, branchLinkClickHandler, closePatchset, confirmation, disableBeforeUnload, disableElement, dropdownMessage, dropdownOptionClicked, enableBeforeUnload, enableElement, generateBranchHtml, generatePluginsHtml, hideContents, isUnique, openLoadingScreen, progressbar, sendPost, setDropdownText, setLoadingText, validatePatchset;
+    var $advancedOptionsDropdown, $basicOptionsDropdown, $branchContents, $branches, $canvasnetPatchsetContents, $errorLogHolder, $loadingDiv, $multiplePatchsetContents, $multiplePluginsContents, $patchsetContents, $pluginPatchsetContents, $portalForm, $versionModal, branchLinkClickHandler, closePatchset, closePlugin, confirmation, disableBeforeUnload, disableElement, dropdownMessage, dropdownOptionClicked, enableBeforeUnload, enableElement, generateBranchHtml, generatePluginsHtml, hideContents, isUnique, isUniquePlugin, isValidPlugin, openLoadingScreen, progressbar, sendPost, setDropdownText, setLoadingText, validatePatchset, validatePlugin;
     $loadingDiv = $('#loading');
     $portalForm = $('#portal_form');
     $branches = $('#branches');
@@ -11,6 +11,7 @@
     $branchContents = $('#branch_contents');
     $patchsetContents = $('#patchset_contents');
     $multiplePatchsetContents = $('#multiple_patchset_contents');
+    $multiplePluginsContents = $('#multiple_plugins_contents');
     $pluginPatchsetContents = $('#plugin_patchset_contents');
     $versionModal = $('#version_modal');
     $errorLogHolder = $('#error_log_holder');
@@ -44,6 +45,16 @@
         }
       });
     };
+    closePlugin = function() {
+      return $('.remove_plugin').bind('click', function() {
+        var $addPlugin;
+        $addPlugin = $('#add_plugin');
+        $(this).parent().parent().remove();
+        if ($addPlugin.is(':disabled')) {
+          return enableElement($addPlugin);
+        }
+      });
+    };
     hideContents = function() {
       if ($patchsetContents.is(':visible')) {
         $patchsetContents.slideToggle();
@@ -57,6 +68,9 @@
       if ($multiplePatchsetContents.is(':visible')) {
         $multiplePatchsetContents.slideToggle();
       }
+      if ($multiplePluginsContents.is(':visible')) {
+        $multiplePluginsContents.slideToggle();
+      }
       if ($errorLogHolder.is(':visible')) {
         $errorLogHolder.slideToggle();
       }
@@ -68,6 +82,23 @@
       hideContents();
       e.preventDefault();
       return setDropdownText(dropdown, elementClicked.text());
+    };
+    validatePlugin = function(pluginElement) {
+      var isValid, pattern, regex;
+      isValid = 0;
+      if (pluginElement.val().length > 0) {
+        regex = /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/\S*\srefs\/changes\/\d+\/\d+\/\d+/;
+        pattern = new RegExp(regex);
+        if (pattern.test(pluginElement.val().trim()) === false) {
+          alert('invalid plugin');
+          pluginElement.val('');
+          isValid = 1;
+        }
+      } else {
+        alert('cannot have an empty plugin');
+        isValid = 1;
+      }
+      return isValid;
     };
     validatePatchset = function(patchsetElement) {
       var digitRegEx, isValid, pattern;
@@ -204,6 +235,43 @@
       }
       return _results;
     };
+    isValidPlugin = function(plugins) {
+      var regex, valid;
+      valid = false;
+      regex = /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/[\S]*\S*\srefs\/changes\/\d+\/\d+\/\d+\s&&\sgit\ checkout\sFETCH_HEAD/;
+      plugins.each(function(idx, el) {
+        return valid = regex.test($(el).val());
+      });
+      if (!valid) {
+        alert('invalid plugin');
+      }
+      return valid;
+    };
+    isUniquePlugin = function(plugins) {
+      var i, last, projects, valid;
+      valid = true;
+      projects = [];
+      plugins.each(function(idx, el) {
+        var project;
+        console.log("VAL " + $(el).val());
+        project = $(el).val().split(":29418/")[1].split(" ")[0];
+        return projects.push(project);
+      });
+      projects.sort();
+      last = projects[0];
+      i = 1;
+      while (i < projects.length) {
+        if (projects[i] === last) {
+          valid = false;
+        }
+        last = projects[i];
+        i++;
+      }
+      if (!valid) {
+        alert("can't have duplicate plugin patchsets");
+      }
+      return valid;
+    };
     isUnique = function(patchsets) {
       var k, values;
       values = [];
@@ -286,6 +354,22 @@
         return closePatchset();
       }
     });
+    $('#add_plugin').bind('click', function() {
+      var pluginCount, template;
+      pluginCount = $('.plugin_patchset:visible').length;
+      if (pluginCount !== 5) {
+        if (pluginCount === 4) {
+          disableElement($(this));
+        }
+        template = $('#plugin_template').html();
+        if (pluginCount === 1) {
+          $('#initial_plugin_group').after(template);
+        } else {
+          $('.additional_plugin:visible:last').after(template);
+        }
+        return closePlugin();
+      }
+    });
     $portalForm.bind('submit', function(e) {
       var action;
       action = 'checkout';
@@ -340,6 +424,34 @@
         }
       } else {
         return alert('you have the same patchset more than once');
+      }
+    });
+    $('#multiple_plugins').bind('submit', function(e) {
+      var $plugins, action, formattedPlugins, pluginValue;
+      action = 'checkout_multiple_plugins';
+      e.preventDefault();
+      $plugins = $('.plugin_patchset:visible');
+      if ($plugins.length === 1) {
+        return alert('this option is for checking out multiple plugin patchsets only');
+      } else {
+        if (isValidPlugin($plugins) && isUniquePlugin($plugins)) {
+          formattedPlugins = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = $plugins.length; _i < _len; _i++) {
+              pluginValue = $plugins[_i];
+              _results.push(pluginValue.value);
+            }
+            return _results;
+          })();
+          openLoadingScreen(null, action);
+          return sendPost("/" + action, [
+            {
+              name: 'plugins',
+              value: formattedPlugins.join('*')
+            }
+          ]);
+        }
       }
     });
     $('#plugin_form').bind('submit', function(e) {
@@ -557,6 +669,10 @@
     $('#multiple_patchsets_option').bind('click', function(e) {
       dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
       return $('#multiple_patchset_contents').slideToggle();
+    });
+    $('#multiple_plugins_option').bind('click', function(e) {
+      dropdownOptionClicked(e, $(this), $advancedOptionsDropdown);
+      return $('#multiple_plugins_contents').slideToggle();
     });
     $('#start_server').bind('click', function(e) {
       var action;

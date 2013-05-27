@@ -44,6 +44,8 @@ Dir.chdir('/home/hudson/canvas-lms') do
       BTools.checkout(options[:value])
     when 'patchsets'
       BTools.checkout_multiple(options[:value].split('*'))
+    when 'plugins'
+      BTools.checkout_multiple_plugins(options[:value].split('*'))
     when 'reset_database'
       BTools.reset_database
     when 'branch'

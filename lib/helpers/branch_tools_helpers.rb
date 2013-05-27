@@ -66,6 +66,7 @@ module BTools
   def BTools.delayed_jobs(action = 'start')
     system("#{Dirs::CANVAS}/script/delayed_job #{action}")
     system("#{Dirs::CANVAS}/script/delayed_job run >> #{Dirs::HUDSON}/files/jobs.log 2>&1 &") if action == 'start'
+    kill_all_jobs if action == 'stop'
   end
   
   def BTools.bundle
@@ -94,7 +95,7 @@ module BTools
     bundle
     system("cp #{Dirs::FILES}/portal.rake #{Dirs::CANVAS}/lib/tasks/")
     if recreate_database
-      delayed_jobs('stop')
+      kill_all_jobs
       kill_database_connections
       create_migrate_assets(true)
       enable_features
@@ -309,7 +310,7 @@ module BTools
       system("git fetch #{Tools::GERRIT_URL}/#{plugin_project} refs/changes/#{plugin_patchset} && git checkout FETCH_HEAD")
       end     
     end
-    Tools.apache_server('start')
+    full_update
   end
 
   def BTools.checkout_multiple(patchsets)

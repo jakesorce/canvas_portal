@@ -20,7 +20,11 @@ module BTools
   def BTools.kill_all_jobs
     delayed_jobs('stop')
     sleep 3 #give delayed jobs some time to shutdown
-    File.open("#{Dirs::CANVAS}/tmp/pids/delayed_jobs_pool.pid").each { |line| system("kill -9 #{line}") } #kill any delayed jobs that are still around
+    system("ps aux|grep delayed > ../files/delayed_jobs.pid")
+    File.open("#{Dirs::FILES}/delayed_jobs.pid").each do |line|
+      pid = line.split("hudson").last.to_i
+      system("kill -9 #{pid}")
+    end #kill any delayed jobs that are still around
   end
   
   def BTools.clear_log_files

@@ -25,8 +25,9 @@ module Tools
     Dir.chdir(dir) { one_eight ? one_eight_command('bundle update && bundle exec script/delayed_job restart') : system('bundle update && bundle exec script/delayed_job restart') }
   end
   
-  def checkout_command(patchset)
-    "git fetch #{Tools::GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git checkout FETCH_HEAD"
+  def checkout_command(patchset, cherrypick = false)
+    cherrypick == 'on' ? (type = 'cherry-pick') : (type = 'checkout')
+    "git fetch #{Tools::GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git #{type} FETCH_HEAD"
   end
   
   def btools_command(params, flag = '-d')
@@ -41,7 +42,7 @@ module Tools
     values = []
     action = params.keys.first
     value = params.values.first
-    value = checkout_command(value) if Validation.is_patchset(value)
+    value = checkout_command(value, params.values.last) if Validation.is_patchset(value)
     doc = 'docs' if params.has_key?('docs')
     localization = 'localization' if params.has_key?('localization')
     values << action << value << doc << localization

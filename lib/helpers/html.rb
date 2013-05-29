@@ -11,6 +11,9 @@ module Sinatra::HtmlHelpers
           <div class="controls">
             <input required name="#{input_id}" id="#{input_id}" type="text" placeholder="62/14362/6" />
             <button type="button" class="help_button btn hidden-phone">Help?</button>
+            <label id="cherry_pick_label" class="checkbox pull-right">
+              <input id="cherry_pick_option" name="cherry-pick" type="checkbox"> cherry-pick
+            </label>
           </div>
         </div>
         <div>

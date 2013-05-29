@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'pry'
 require File.expand_path(File.dirname(__FILE__) + '/dirs')
 require File.expand_path(File.dirname(__FILE__) + '/files')
 require File.expand_path(File.dirname(__FILE__) + '/tools')
@@ -133,14 +134,13 @@ module BTools
   def BTools.reset_branch
     remove_rebase_file
     system("git reset --hard origin/master")
-    system("git clean")
     system('git checkout master')
+    system('git branch -D portalPatchset')
   end
   
   def BTools.reset_branch_options(branch)
     remove_rebase_file
     branch == 'master' ? system("git reset --hard origin/master") : system("git reset --hard")
-    system("git clean")
   end
   
   def BTools.generate_origin_url(origin)
@@ -275,9 +275,10 @@ module BTools
     load_initial_data if lid
     Tools.apache_server('start')
   end
-
+  
   def BTools.checkout(url)
     reset_update_plugins
+    system("git checkout -b portalPatchset origin/master")
     `#{url}`
     if $?.exitstatus == 128
       Writer.write_file(Files::ERROR_FILE, 'fatal error checking out pathset, are you sure that is the right patchset?')
@@ -285,8 +286,8 @@ module BTools
       exit! 1
     end
     checkout_status = `git status 2>&1`
-    if checkout_status.include?('Unmerged')
-      Writer.write_file(Files::ERROR_FILE, checkout_output)
+    if checkout_status.include?('error:')
+      Writer.write_file(Files::ERROR_FILE, checkout_status)
       reset_branch
       exit! 1
     end
@@ -388,7 +389,7 @@ module BTools
       end
       checkout_status = `git status 2>&1`
       if checkout_status.include?('Unmerged')
-        Writer.write_file(Files::ERROR_FILE, checkout_output)
+        Writer.write_file(Files::ERROR_FILE, checkout_status)
         reset_branch
         exit! 1
       end

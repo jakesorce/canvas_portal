@@ -26,7 +26,7 @@ module Tools
   end
   
   def checkout_command(patchset, cherrypick = false)
-    cherrypick == 'on' ? (type = 'cherry-pick') : (type = 'checkout')
+    type = cherrypick == 'on' ? 'cherry-pick' : 'checkout'
     "git fetch #{Tools::GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git #{type} FETCH_HEAD"
   end
   

@@ -1,10 +1,12 @@
 require 'fileutils'
-require 'pry'
+require 'active_record'
+require File.expand_path(File.dirname(__FILE__) + '/../../app/models/portal_data')
 require File.expand_path(File.dirname(__FILE__) + '/dirs')
 require File.expand_path(File.dirname(__FILE__) + '/files')
 require File.expand_path(File.dirname(__FILE__) + '/tools')
 require File.expand_path(File.dirname(__FILE__) + '/writer')
 require File.expand_path(File.dirname(__FILE__) + '/git')
+require File.expand_path(File.dirname(__FILE__) + '/connection')
 
 module BTools
   def BTools.basic_update
@@ -21,11 +23,7 @@ module BTools
   def BTools.kill_all_jobs
     delayed_jobs('stop')
     sleep 3 #give delayed jobs some time to shutdown
-    system("ps aux|grep delayed > ../files/delayed_jobs.pid")
-    File.open("#{Dirs::FILES}/delayed_jobs.pid").each do |line|
-      pid = line.split("hudson").last.to_i
-      system("kill -9 #{pid}")
-    end #kill any delayed jobs that are still around
+    system("kill -9 $(ps aux|grep delayed | awk '{print $2}')")
   end
   
   def BTools.clear_log_files
@@ -66,7 +64,6 @@ module BTools
   
   def BTools.delayed_jobs(action = 'start')
     system("#{Dirs::CANVAS}/script/delayed_job #{action}")
-    system("#{Dirs::CANVAS}/script/delayed_job run >> #{Dirs::HUDSON}/files/jobs.log 2>&1 &") if action == 'start'
   end
   
   def BTools.bundle
@@ -261,8 +258,11 @@ module BTools
   end
 
   def BTools.check_action_flags
-    generate_documentation if File.exists? Files::DOCUMENTATION_FILE
-    File.exists?(Files::LOCALIZATION_FILE) ? swap_env_file(true) : swap_env_file
+    connection = Connection.open
+    pd = PortalData.first
+    generate_documentation if pd.documentation 
+    pd.localization ? swap_env_file(true) : swap_env_file
+    Connection.close(connection)
   end
 
   def BTools.post_setup(lid = false)
@@ -334,7 +334,9 @@ module BTools
   end
 
   def BTools.canvas_master
-    reset_database = File.exists? Files::OLD_BRANCH_FILE
+    connection = Connection.open
+    pd = PortalData.first
+    reset_database = pd.old_branch
     reset_update_plugins
     output = `git checkout master`
     if(output.include?('error:'))
@@ -344,16 +346,18 @@ module BTools
     end
     if reset_database
       full_update(true)
-      File.delete(Files::OLD_BRANCH_FILE)
+      pd.update_attributes({old_branch: nil})
     else
       full_update
     end
+    Connection.close(connection)
   end
 
   def BTools.branch(branch_name)
     reset_branch
     basic_update
-    Writer.write_file(Files::OLD_BRANCH_FILE, 'old branch has been checked out')
+    connection = Connection.open
+    PortalData.first.update_attributes({old_branch: true})
     checkout_all_plugins(true, branch_name)
     branch_command = "git checkout #{branch_name}"
     output = `#{branch_command}`

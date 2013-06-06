@@ -1,7 +1,9 @@
-module ActionTime
+require 'sinatra/base'
+
+module Sinatra::ActionTime
   def store_action_time(action, execution_time)
-    require "#{Dirs::CONFIG}/action_time_schema"
-    ActionTimes.find_or_create_by_action(action).update_attributes({:time => (execution_time.round * 1000)})
+    time = (execution_time.round * 1000)
+    ActionTimes.find_by_action(action) == nil ? ActionTimes.create!(action: action, time: time) : update_action_time(action, time)
     ActiveRecord::Base.connection.close
   end
   module_function :store_action_time

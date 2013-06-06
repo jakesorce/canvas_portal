@@ -14,8 +14,6 @@ optparse = OptionParser.new do |opts|
     values = params.split(',')
     options[:action] = values[0]
     options[:value] = values[1]
-    write_file("#{FILES_BASE}/documentation.txt", 'docs') if values.include? 'docs'
-    write_file("#{FILES_BASE}/localization.txt", 'localize') if values.include? 'localization'
   end
 
   opts.on('-h', '--help', 'Display this screen') do

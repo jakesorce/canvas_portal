@@ -508,19 +508,8 @@
       }
     });
     $('#version_form').bind('submit', function(e) {
-      var $version, action;
-
-      action = 'change_version';
-      e.preventDefault();
-      $version = $('#version_text').text().split(' ')[0];
-      openLoadingScreen("Switching to " + $version + "...", action);
-      $versionModal.modal('hide');
-      return sendPost("/" + action, [
-        {
-          name: 'version',
-          value: $version
-        }
-      ]);
+      alert("only Ruby 1.9.3 is currently supported");
+      return $versionModal.modal('hide');
     });
     $('#available_branches').bind('click', function(e) {
       var $branchesButton;

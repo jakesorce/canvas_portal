@@ -4,7 +4,7 @@ class Portal < Sinatra::Application
   end
 
   post "/change_version" do
-    Writer.write_info('change ruby version')
+    update_fields({portal_action: 'change ruby version'})
     Version.change_version(params)
   end
 end

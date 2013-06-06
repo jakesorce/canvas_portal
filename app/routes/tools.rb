@@ -1,6 +1,6 @@
 class Portal < Sinatra::Application
   get "/action_time" do
-    require "#{Dirs::CONFIG}/action_time_schema"
+    ActionTimes.create! if ActionTimes.first == nil
     action = ActionTimes.find_by_action(params.keys.first)
     ActiveRecord::Base.connection.close
     response.write(action.time.to_s) if action
@@ -15,28 +15,28 @@ class Portal < Sinatra::Application
   end
 
   post "/dcm_initial_data" do
-    Writer.write_info('reset database')
+    update_fields({portal_action: 'reset database'})
     Tools.btools_command(params)
   end
 
   post "/apache_server/:action" do |action|
-    Writer.write_info('start server') if action == 'start'
+    update_fields({portal_action: 'start server'}) if action == 'start'
     Tools.apache_server(action)
   end
  
   post '/shutdown' do
-    Writer.write_info('shut down portal')
+    update_fields({portal_action: 'shut down portal'})
     Tools.shut_down_portal
   end
 
   post '/restart_jobs_canvas' do
-    Writer.write_info('restart jobs canvas')
+    update_fields({portal_action: 'restart jobs canvas'})
     Tools.restart_jobs("#{Dirs::CANVAS}")
     Tools.apache_server('start')
   end
 
   post '/restart_jobs_canvasnet' do
-    Writer.write_info('restart jobs canvasnet')
+    update_fields({portal_action: 'restart jobs canvasnet'})
     Tools.restart_jobs("#{Dirs::UDEMODO}", true)
     Tools.apache_server('start')
   end

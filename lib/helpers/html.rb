@@ -39,22 +39,23 @@ module Sinatra::HtmlHelpers
   end
 
   def hover_info
-    info_file = Files::INFO_FILE
+    pd = PortalData.first
+    info_file = pd.portal_action
     error_file = Files::ERROR_FILE
     error_text = "error occurred on last action, try again"
     no_action_text = "no portal action has taken place"
-    patchset_text = Files.first_line(Files::PATCHSET_FILE)
-    doc_text = 'documentation flag' if File.exists? Files::DOCUMENTATION_FILE
-    localization_text = 'localization flag' if File.exists? Files::LOCALIZATION_FILE
+    patchset_text = pd.patchset
+    doc_text = 'documentation flag' if pd.documentation
+    localization_text = 'localization flag' if pd.localization
     action_flags = []
     action_flags << doc_text << localization_text
     action_flags.compact!
     patchset_html = "<div class='pad-bottom'><h5>Current Patchset:</h5><div id='patchset_info'>#{patchset_text}</div></div>" if patchset_text
     action_flags_html = "<div class='pad-bottom'><h5>Action Flags Used On Last Code Changing Action:</h5><div id='action_flags_info'>#{action_flags.join("<br />")}</div></div>" if not action_flags.empty?
     dt_last_action = last_action = no_action_text
-    if File.exists? info_file
-      dt_last_action = Files.first_line(info_file)
-      last_action = File.readlines(info_file).last
+    if pd.portal_action
+      dt_last_action = pd.last_action_time
+      last_action = pd.portal_action
     elsif File.exists? error_file 
       dt_last_action = last_action = error_text
     end
@@ -63,7 +64,7 @@ module Sinatra::HtmlHelpers
         <div id="hover_info_popup" class="center">
           <div class="pad-bottom">
             <h5>Current Branch:</h5>
-            <div id="branch_info">#{Files.branch_file}</div>
+            <div id="branch_info">#{pd.branch}</div>
           </div>
           #{patchset_html}
           <div class="pad-bottom">

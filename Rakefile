@@ -1,3 +1,6 @@
+require './portal'
+require 'sinatra/activerecord/rake'
+
 desc "Builds the minified CSS and JS assets."
 task :minify do
   require './portal.rb'   # <= change this

@@ -38,8 +38,7 @@ class Portal < Sinatra::Application
 
   post "/master_canvas_net" do
     branch = 'canvas network master'
-    Writer.write_info(branch)
-    Writer.write_file(Files::BRANCH_FILE, branch)
+    update_fields({portal_action: branch, branch: branch})
     remove_net_pids
     Dir.chdir("#{Dirs::UDEMODO}") do
       database_setup
@@ -53,7 +52,7 @@ class Portal < Sinatra::Application
   post "/canvasnet_patchset" do
     patchset = params.values.first
     Validation.validate_patchset(patchset)
-    Writer.write_info(patchset)
+    update_fields({portal_action: patchset})
     remove_net_pids
     Dir.chdir("#{Dirs::UDEMODO}") do
       database_setup

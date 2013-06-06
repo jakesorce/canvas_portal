@@ -4,8 +4,8 @@ class Portal < Sinatra::Application
   end
 
   post "/branch" do
-    Writer.write_info('branch checkout')
-    Writer.write_file(Files::BRANCH_FILE, params.values.first)  
+    update_fields({portal_action: 'branch checkout', branch: params.values.first})
+    update_flags(params[:docs], params[:localization])
     Tools.btools_command(params)
   end
 end

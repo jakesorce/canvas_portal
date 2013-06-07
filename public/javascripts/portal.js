@@ -577,7 +577,7 @@
           var $versionText, oneEightSeven, oneNineThree;
 
           $versionText = $('#version_text');
-          oneEightSeven = 'ree-1.8.7-2011.03';
+          oneEightSeven = '---';
           oneNineThree = '1.9.3-p286';
           if (data.trim() === oneNineThree) {
             $versionText.text(oneEightSeven);

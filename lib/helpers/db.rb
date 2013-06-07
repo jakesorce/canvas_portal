@@ -1,5 +1,4 @@
 require 'sinatra/base'
-
 module Sinatra::DB
   def update_fields(fields = {})
     db = PortalData.first
@@ -20,6 +19,6 @@ module Sinatra::DB
   end
 
   def update_flags(documentation, localization)
-    update_fields({documention: documentation, localization: localization})   
+    update_fields({documentation: documentation, localization: localization})   
   end
 end

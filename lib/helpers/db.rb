@@ -3,7 +3,7 @@ module Sinatra::DB
   def update_fields(fields = {})
     db = PortalData.first
     db.attributes = fields
-    db.save
+    db.save!
     update_last_action_time if fields.include? :portal_action
   end
 
@@ -15,7 +15,7 @@ module Sinatra::DB
     fields = {action: action, time: time}
     db = ActionTimes.first
     db.attributes = fields
-    db.save
+    db.save!
   end
 
   def update_flags(documentation, localization)

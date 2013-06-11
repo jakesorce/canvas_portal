@@ -8,10 +8,5 @@ module Connection
     )
     ActiveRecord::Base.connection
   end
-
-  def close(connection)
-    connection.disconnect!
-  end
   module_function :open
-  module_function :close
 end

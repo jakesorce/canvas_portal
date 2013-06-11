@@ -2,12 +2,10 @@ require 'pry'
 
 module Validation
   def check_error_file
-    connection = Connection.open
+    Connection.open
     portal_user = PORTAL_CONFIG['portal']['username']
     if File.exists? Files::ERROR_FILE
       PortalData.first.update_attributes({portal_action: nil})
-      Connection.close(connection)
-      File.delete(Files::INFO_FILE) if File.exists? Files::INFO_FILE
       mail = Mail.deliver do
         to PORTAL_CONFIG['sendgrid']['emails']
         from "Portal V4  #{portal_user} <portalv4#{portal_user}@instructure.com>"

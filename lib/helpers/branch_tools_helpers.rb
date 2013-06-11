@@ -41,17 +41,7 @@ module BTools
   
   def BTools.enable_features
     system('export RAILS_ENV=production;')
-    require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
-    Setting.set('enable_page_views', 'db')
-    Account.default.enable_service(:analytics)
-    Setting.set('show_feedback_link', 'true')
-    Setting.set('enable_page_views', 'cassandra')
-    Account.default.tap do |a|
-      a.settings[:enable_scheduler] = true
-      a.settings[:show_scheduler] = true
-      a.save!
-    end
-    PluginSetting.new(:name => "kaltura", :settings => {"rtmp_domain"=>"rtmp.instructuremedia.com", "kcw_ui_conf"=>"1727883", "domain"=>"www.instructuremedia.com", "user_secret_key"=>"54122449a76ae10409adcefa3148f4b7", "secret_key"=>"ed7eae22d60b82e0b44fb95089ddb228", "player_ui_conf"=>"1727899", "upload_ui_conf"=>"1103", "partner_id"=>"100", "subpartner_id"=>"10000", "resource_domain"=>"www.instructuremedia.com"}).save
+    system('RAILS_ENV=production bundle exec script/runner ~/files/features.rb')
   end
   
   def BTools.replace_files(options = {})
@@ -68,7 +58,7 @@ module BTools
   
   def BTools.bundle
     FileUtils.rm_rf("#{Dirs::CANVAS}/Gemfile.lock")
-    system('bundle update')
+    system('bundle install')
   end
 
   def BTools.create_migrate_assets(drop = false)
@@ -240,7 +230,6 @@ module BTools
       exit! 1
     end
     if load_initial_data
-      require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
       system('export RAILS_ENV=production; bundle exec rake db:load_initial_data')
     end
   end
@@ -258,11 +247,10 @@ module BTools
   end
 
   def BTools.check_action_flags
-    connection = Connection.open
+    Connection.open
     pd = PortalData.first
     generate_documentation if pd.documentation 
     pd.localization ? swap_env_file(true) : swap_env_file
-    Connection.close(connection)
   end
 
   def BTools.post_setup(lid = false)
@@ -334,7 +322,7 @@ module BTools
   end
 
   def BTools.canvas_master
-    connection = Connection.open
+    Connection.open
     pd = PortalData.first
     reset_database = pd.old_branch
     reset_update_plugins
@@ -350,13 +338,13 @@ module BTools
     else
       full_update
     end
-    Connection.close(connection)
+    
   end
 
   def BTools.branch(branch_name)
     reset_branch
     basic_update
-    connection = Connection.open
+    Connection.open
     PortalData.first.update_attributes({old_branch: true})
     checkout_all_plugins(true, branch_name)
     branch_command = "git checkout #{branch_name}"

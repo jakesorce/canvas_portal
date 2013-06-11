@@ -247,10 +247,11 @@ module BTools
   end
 
   def BTools.check_action_flags
-    Connection.open
-    pd = PortalData.first
-    generate_documentation if pd.documentation 
-    pd.localization ? swap_env_file(true) : swap_env_file
+    Connection.manage_connection do
+      pd = PortalData.first
+      generate_documentation if pd.documentation 
+      pd.localization ? swap_env_file(true) : swap_env_file
+    end
   end
 
   def BTools.post_setup(lid = false)
@@ -322,30 +323,31 @@ module BTools
   end
 
   def BTools.canvas_master
-    Connection.open
-    pd = PortalData.first
-    reset_database = pd.old_branch
-    reset_update_plugins
-    output = `git checkout master`
-    if(output.include?('error:'))
-      Writer.write_file(Files::ERROR_FILE, output)
-      reset_branch
-      exit! 1
-    end
-    if reset_database
-      full_update(true)
-      pd.update_attributes({old_branch: nil})
-    else
-      full_update
-    end
-    
+    Connection.manage_connection do
+      pd = PortalData.first
+      reset_database = pd.old_branch
+      reset_update_plugins
+      output = `git checkout master`
+      if(output.include?('error:'))
+        Writer.write_file(Files::ERROR_FILE, output)
+        reset_branch
+        exit! 1
+      end
+      if reset_database
+        full_update(true)
+        pd.update_attributes({old_branch: nil})
+      else
+        full_update
+      end
+    end  
   end
 
   def BTools.branch(branch_name)
     reset_branch
     basic_update
-    Connection.open
-    PortalData.first.update_attributes({old_branch: true})
+    Connection.manage_connection do
+      PortalData.first.update_attributes({old_branch: true})
+    end
     checkout_all_plugins(true, branch_name)
     branch_command = "git checkout #{branch_name}"
     output = `#{branch_command}`

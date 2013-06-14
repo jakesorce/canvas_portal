@@ -40,8 +40,13 @@ module Tools
   ssl: true" > #{Dirs::HUDSON}/canvas-lms/config/domain.yml`
     end
     values = []
-    action = params.keys.first
-    value = params.values.first
+    if params.include?('patchset') && params.include?('plugin')
+      action = "patchset_and_plugin"
+      value = "#{params[:patchset]}*#{params[:plugin]}"
+    else
+      action = params.keys.first
+      value = params.values.first
+    end
     value = checkout_command(value, params.values.last) if Validation.is_patchset(value)
     doc = 'docs' if params.has_key?('docs')
     localization = 'localization' if params.has_key?('localization')

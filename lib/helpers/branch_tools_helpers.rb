@@ -265,12 +265,12 @@ module BTools
     Tools.apache_server('start')
   end
   
-  def BTools.checkout(url)
+  def BTools.checkout(url, update = true)
     reset_update_plugins
     system("git checkout -b portalPatchset origin/master")
     `#{url}`
     if $?.exitstatus == 128
-      Writer.write_file(Files::ERROR_FILE, 'fatal error checking out pathset, are you sure that is the right patchset?')
+      Writer.write_file(Files::ERROR_FILE, 'fatal error checking out patchset, are you sure that is the right patchset?')
       reset_branch
       exit! 1
     end
@@ -280,7 +280,16 @@ module BTools
       reset_branch
       exit! 1
     end
-    full_update
+    full_update if update
+  end
+  
+  def BTools.checkout_patchset_and_plugin(patchsets)
+    values = patchsets.split('*')
+    patchset = values.first
+    plugin = values.last
+    url = Tools.checkout_command(patchset)
+    checkout(url, false)
+    plugin_patchset(plugin, false)
   end
 
   def BTools.checkout_multiple_plugins(plugins)
@@ -366,8 +375,8 @@ module BTools
     full_update
   end
 
-  def BTools.plugin_patchset(value)
-    reset_update_plugins
+  def BTools.plugin_patchset(value, reset = true)
+    reset_update_plugins if reset
     values = value.split(' ')
     plugin = values[2].split('/').last
     checkout_command = "git fetch #{Tools::GERRIT_URL}/#{plugin} #{values[3]} && git checkout FETCH_HEAD"
@@ -377,7 +386,7 @@ module BTools
       basic_update
       `#{checkout_command}`
       if $?.exitstatus == 128
-        Writer.write_file(Files::ERROR_FILE, "fatal error checking out pathset, are you sure that is the right patchset for #{plugin}?")
+        Writer.write_file(Files::ERROR_FILE, "fatal error checking out patchset, are you sure that is the right patchset for #{plugin}?")
         reset_branch
         exit! 1
       end

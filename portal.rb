@@ -17,7 +17,7 @@ require File.expand_path(File.dirname(__FILE__) + '/lib/helpers/action_time')
 require File.expand_path(File.dirname(__FILE__) + '/app/models/portal_data')
 require File.expand_path(File.dirname(__FILE__) + '/app/models/action_times')
 
-ROUTES = %w[branch master_canvas_net canvasnet_patchset checkout checkout_multiple checkout_multiple_plugins plugin_patchset dcm_initial_data change_version]
+ROUTES = %w[branch master_canvas_net canvasnet_patchset checkout checkout_multiple checkout_multiple_plugins plugin_patchset patchset_and_plugin dcm_initial_data change_version]
 PORTAL_CONFIG = YAML.load_file(File.expand_path(File.dirname(__FILE__) + '/config/portal.yml'))
 Mail.defaults do
   delivery_method :smtp, { :address   => PORTAL_CONFIG['sendgrid']['address'],

@@ -1,0 +1,14 @@
+#patchset_and_plugin_contents.invisible.action-contents
+  %form#patchset_and_plugin_form.form-horizontal{:method => "post"}
+    #initial_patchset_group.control-group
+      %label.control-label Patchset:
+      .controls
+      %input.patchset{:name => 'patchset', :placeholder => "62/14362/6", :required => "", :type => "text"}/
+      %button.help_button.btn{:type => "button"} Help?
+    #initial_plugin_group.control-group
+      %label.control-label Checkout URL:
+      .controls#combined
+        %input.plugin_patchset{:name => 'plugin', :placeholder => "git fetch ssh://user@gerrit.instructure.com:29418/custom_reports refs/changes/63/15263/1 && git checkout FETCH_HEAD", :required => "", :type => "text"}/
+        %button.plugins_help_button.btn{:type => "button"} Help?
+    %div
+      %input#generate_environment.btn.btn-primary{:name => "submit", :type => "submit", :value => "Generate Environment"}/

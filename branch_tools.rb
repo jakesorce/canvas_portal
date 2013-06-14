@@ -53,5 +53,7 @@ Dir.chdir('/home/hudson/canvas-lms') do
       BTools.change_version(Git.current_branch)
     when 'plugin_patchset'
       BTools.plugin_patchset(options[:value])
+    when 'patchset_and_plugin'
+      BTools.checkout_patchset_and_plugin(options[:value])
   end
 end

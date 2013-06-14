@@ -7,6 +7,7 @@ $ ->
   $branchContents = $('#branch_contents')
   $patchsetContents = $('#patchset_contents')
   $multiplePatchsetContents = $('#multiple_patchset_contents')
+  $patchsetAndPluginContents = $('#patchset_and_plugin_contents')
   $multiplePluginsContents = $('#multiple_plugins_contents')
   $pluginPatchsetContents = $('#plugin_patchset_contents')
   $versionModal = $('#version_modal')
@@ -156,7 +157,7 @@ $ ->
   
   isValidPlugin = (plugins) ->
     valid = false
-    regex = /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/[\S]*\S*\srefs\/changes\/\d+\/\d+\/\d+\s&&\sgit\ checkout\sFETCH_HEAD/
+    regex = /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/[\S]*\S*\srefs\/changes\/\d+\/\d+\/\d+\s&&\sgit\scheckout\sFETCH_HEAD/
     plugins.each (idx, el) ->
       valid = regex.test($(el).val())
     alert('invalid plugin') if !valid
@@ -268,6 +269,16 @@ $ ->
       else
         setDropdownText($advancedOptionsDropdown, dropdownMessage)
   
+  $('#patchset_and_plugin_form').bind 'submit', (e) ->
+    action = 'patchset_and_plugin'
+    e.preventDefault()
+    isValid = 0
+    isValid = validatePatchset($('.patchset:visible')) 
+    isValid = validatePlugin($('.plugin_patchset:visible'))
+    if isValid == 0
+      openLoadingScreen(null, action)
+      sendPost("/#{action}",  $(@).serializeArray())
+
   $('#multiple_patchsets').bind 'submit', (e) ->
     action = 'checkout_multiple'
     e.preventDefault()
@@ -398,6 +409,10 @@ $ ->
   $('#branch_checkout').bind 'click', (e) ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
     $branchContents.slideToggle()
+
+  $('#patchset_and_plugin').bind 'click', (e) ->
+    dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)
+    $patchsetAndPluginContents.slideToggle()
 
   $('#plugin_patchset').bind 'click', (e) ->
     dropdownOptionClicked(e, $(@), $advancedOptionsDropdown)

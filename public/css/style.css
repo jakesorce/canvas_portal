@@ -32,6 +32,9 @@ textarea {
   overflow: scroll;
   height: 400px; }
 
+#combined {
+  margin-right: 20px; }
+
 #supported_plugins {
   background-color: white;
   overflow: scroll;

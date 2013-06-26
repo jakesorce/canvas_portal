@@ -9,12 +9,15 @@ class Portal < Sinatra::Application
   
   def format_patchsets(patchsets)
     p = patchsets.split('*')
-    p.map! { |patchset| patchset = parse_patchset(patchset) if patchset.length > 13 }
+    p.map! do |patchset| 
+      patchset.strip! 
+      patchset.length > 13 ? parse_patchset(patchset) : patchset
+    end
     p.join('*')
   end
 
   post "/checkout" do
-    patchset = params.values.first.length > 13 ? parse_patcshet(params.values.first) : params.values.first
+    patchset = params.values.first.length > 13 ? parse_patcshet(params.values.first) : params.values.first.strip!
     params['portal_form_patchset'] = patchset
     halt 400 if not Validation.validate_patchset(patchset)
     update_fields({portal_action: 'patchset checkout', patchset: patchset})
@@ -33,6 +36,7 @@ class Portal < Sinatra::Application
  
   post "/patchset_and_plugin" do
     params[:patchset] = parse_patchset(params[:patchset]) if params[:patchset].length > 13 
+    params[:patchset].strip!
     halt 400 if not Validation.validate_patchset(params[:patchset])
     halt 400 if not Validation.validate_plugin(params[:plugin])
     plugin_patchset = params[:plugin]

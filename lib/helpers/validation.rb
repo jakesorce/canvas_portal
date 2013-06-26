@@ -1,5 +1,3 @@
-require 'pry'
-
 module Validation
   def check_error_file
     portal_user = PORTAL_CONFIG['portal']['username']

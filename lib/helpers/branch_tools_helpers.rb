@@ -9,7 +9,14 @@ require File.expand_path(File.dirname(__FILE__) + '/git')
 require File.expand_path(File.dirname(__FILE__) + '/connection')
 
 module BTools
+  def BTools.update_stage(stage)
+    Connection.manage_connection do
+      PortalData.first.update_attributes(stage: stage) 
+    end
+  end
+  
   def BTools.basic_update
+    update_stage("Updating branch...")
     system("git fetch")
     system("git rebase origin/master")
   end
@@ -21,6 +28,7 @@ module BTools
   end
   
   def BTools.kill_all_jobs
+    update_stage("Stopping delayed jobs...")
     delayed_jobs('stop')
     sleep 3 #give delayed jobs some time to shutdown
     system("kill -9 $(ps aux|grep delayed | awk '{print $2}')")
@@ -31,6 +39,7 @@ module BTools
   end
   
   def BTools.recreate_cassandra_keyspace
+    update_stage("Restarting cassandra...")
     sleep 5 #just incase cassandra isn't ready
     system("cassandra-cli -f #{Dirs::FILES}/cassandra.txt")
   end
@@ -40,12 +49,14 @@ module BTools
   end
   
   def BTools.enable_features
+    update_stage("Enabling features...")
     system('export RAILS_ENV=production;')
     system('RAILS_ENV=production bundle exec script/runner ~/files/features.rb')
   end
   
   def BTools.replace_files(options = {})
     system("echo 'package_assets: always' > config/assets.yml.tmp")
+    update_stage("Copying config files...")
     system("cat config/assets.yml >> config/assets.yml.tmp")
     system("mv config/assets.yml.tmp config/assets.yml")
     system("cp #{options[:file]} config/environments/") unless options.empty?
@@ -53,26 +64,33 @@ module BTools
   end
   
   def BTools.delayed_jobs(action = 'start')
+    update_stage("Starting delayed jobs...") if action == 'start'
     system("#{Dirs::CANVAS}/script/delayed_job #{action}")
   end
   
   def BTools.bundle
+    update_stage("Bundle update...")
     FileUtils.rm_rf("#{Dirs::CANVAS}/Gemfile.lock")
     system('bundle install')
   end
 
   def BTools.create_migrate_assets(drop = false)
     if drop
+      update_stage("Resseting database...")
       drop_create_output = `export RAILS_ENV=production; bundle exec rake db:drop db:create`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:drop or db:create: #{drop_create_output}")
       create_pg_extension
+      update_stage("Migrating database...")
       migrate_output = `export RAILS_ENV=production; bundle exec rake db:migrate`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate #{migrate_output}")
+      update_stage("Loading initial data...")
       lid_output = `export RAILS_ENV=production; bundle exec rake db:load_initial_data`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:load_initial_data #{lid_output}") 
+      update_stage("Compiling assets...")
       assets_output = `export RAILS_ENV=production; bundle exec rake canvas:compile_assets[false]`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with canvas:compile_assets: #{assets_output}")
     else
+      update_stage("Compiling assets...")
       c_m_assets_output = `export RAILS_ENV=production; bundle exec rake db:create db:migrate canvas:compile_assets[false]`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{c_m_assets_output}")
     end
@@ -102,6 +120,7 @@ module BTools
   
   def BTools.load_initial_data
     require "#{Dirs::CANVAS}/config/environment" unless defined?(RAILS_ROOT)
+    update_stage("Loading initial data...")
     system('export RAILS_ENV=production; bundle exec rake db:load_initial_data')
   end
 
@@ -110,15 +129,18 @@ module BTools
   end
 
   def BTools.documentation
+    update_stage("Generating documentation...")
     system('export RAILS_ENV=production; bundle exec rake doc:api')
     Tools.apache_server('start') 
   end
   
   def BTools.generate_documentation
+    update_stage("Generating documentation...")
     system('export RAILS_ENV=production; bundle exec rake doc:api')
   end
   
   def BTools.reset_branch
+    update_stage("Ressetting branch...")
     remove_rebase_file
     system("git reset --hard origin/master")
     system('git checkout master')
@@ -132,6 +154,7 @@ module BTools
   
   def BTools.generate_origin_url(origin)
     clone_statement = ''
+    update_stage("Generating origin URL...")
     if origin == nil
      clone_statement = 'git clone'
     else
@@ -143,6 +166,7 @@ module BTools
   end
   
   def BTools.checkout_plugin(plugin, origin = nil)
+    update_stage("Checking out #{plugin} plugin...")
     clone_statement = generate_origin_url(origin)
     if plugin == 'Analytics'
       plugin = 'canvalytics'
@@ -158,11 +182,13 @@ module BTools
   end
   
   def BTools.remove_plugin(plugin)
+    update_stage("Removing #{plugin} plugin...")
     FileUtils.rm_rf("vendor/plugins/#{plugin}")
     remove_demo_site_symlinks if plugin == 'demo_site'
   end
 
   def BTools.update_plugin(plugin)
+    update_stage("Updating #{plugin} plugin...")
     if plugin == 'QTIMigrationTool'
       exists = system("cd /vendor/#{plugin}")
     else
@@ -177,6 +203,7 @@ module BTools
   end
   
   def BTools.remove_all_plugins
+    update_stage("Removing all plugins...")
     FileUtils.rm_rf("vendor/plugins/analytics")
     FileUtils.rm_rf("vendor/QTIMigrationTool")
     Tools::PLUGINS.each { |plugin| FileUtils.rm_rf("vendor/plugins/#{plugin}") }
@@ -215,6 +242,7 @@ module BTools
   end
   
   def BTools.checkout_all_plugins(do_remove = true, origin = nil)
+    update_stage("Checking out plugins...")
     remove_all_plugins if do_remove
     clone_statement = generate_origin_url(origin)
     system("#{clone_statement} #{Tools::GERRIT_URL}/canvalytics.git vendor/plugins/analytics")
@@ -224,12 +252,14 @@ module BTools
   
   def BTools.database_dcm_initial_data(load_initial_data = true)
     kill_database_connections
+    update_stage("Migrating database...")
     migrate_output = `export RAILS_ENV=production; bundle exec rake db:migrate`
     if migrate_output.include?("rake aborted")
       Writer.write_file(Files::ERROR_FILE, "use advanced option 'View Server Log' for more info -- migration error: #{migrate_output}")
       exit! 1
     end
     if load_initial_data
+      update_stage("Loading initial data...")
       system('export RAILS_ENV=production; bundle exec rake db:load_initial_data')
     end
   end
@@ -243,6 +273,7 @@ module BTools
   end
 
   def BTools.swap_env_file(localize = false)
+    update_stage("Localizing...") if localize
     localize ? replace_files(:file => "#{Dirs::FILES}/localization/production.rb") : replace_files
   end
 
@@ -262,11 +293,13 @@ module BTools
     delayed_jobs
     system('redis-cli flushall')
     load_initial_data if lid
+    update_stage("Starting apache server...")
     Tools.apache_server('start')
   end
   
   def BTools.checkout(url, update = true)
     reset_update_plugins
+    update_stage("Checking out #{url}...")
     system("git checkout -b portalPatchset origin/master")
     `#{url}`
     if $?.exitstatus == 128
@@ -287,8 +320,10 @@ module BTools
     values = patchsets.split('*')
     patchset = values.first
     plugin = values.last
+    update_stage("Checking out #{patchset}...")
     url = Tools.checkout_command(patchset)
     checkout(url, false)
+    update_stage("Checking out #{plugin} plugin...")
     plugin_patchset(plugin, false)
   end
 
@@ -297,6 +332,7 @@ module BTools
     plugins.each do |plugin|
       plugin_project = plugin.split(":29418/").last.split(" ").first
       plugin_patchset = plugin.split("changes/").last.split(" ").first
+      update_stage("Checking out #{plugin_patchset} from #{plugin}...")
       target = ''
       if plugin_project == 'qti_migration_tool'
         target = 'vendor/'
@@ -314,6 +350,7 @@ module BTools
   def BTools.checkout_multiple(patchsets)
     reset_update_plugins
     patchsets.each do |patchset|
+      update_stage("Cherry-picking #{patchset}...")
       `git fetch #{Tools::GERRIT_URL}/canvas-lms.git refs/changes/#{patchset} && git cherry-pick FETCH_HEAD`
       if $?.exitstatus != 0
         Writer.write_file(Files::ERROR_FILE, 'there were conflicts checking out one or more of the patchsets, please make sure all patchsets are in the correct order and have all been rebased recently')
@@ -325,6 +362,7 @@ module BTools
   end
  
   def BTools.reset_database
+    update_stage("Resetting database...")
     bundle
     database_dcm_initial_data
     enable_features
@@ -354,10 +392,9 @@ module BTools
   def BTools.branch(branch_name)
     reset_branch
     basic_update
-    Connection.manage_connection do
-      PortalData.first.update_attributes({old_branch: true})
-    end
+    Connection.manage_connection { PortalData.first.update_attributes({old_branch: true}) }
     checkout_all_plugins(true, branch_name)
+    update_stage("Checking out #{branch_name}...")
     branch_command = "git checkout #{branch_name}"
     output = `#{branch_command}`
     if(output.include?('error:'))
@@ -379,7 +416,9 @@ module BTools
     reset_update_plugins if reset
     values = value.split(' ')
     plugin = values[2].split('/').last
-    checkout_command = "git fetch #{Tools::GERRIT_URL}/#{plugin} #{values[3]} && git checkout FETCH_HEAD"
+    patchset = values[3]
+    update_stage("Checking out #{patchset} from #{plugin}...")
+    checkout_command = "git fetch #{Tools::GERRIT_URL}/#{plugin} #{patchset} && git checkout FETCH_HEAD"
     dir_name = 'analytics' if plugin == 'canvalytics'
     Dir.chdir("#{Dirs::CANVAS}/vendor/plugins/#{dir_name || plugin}") do
       reset_branch

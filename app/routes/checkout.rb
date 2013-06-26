@@ -3,8 +3,19 @@ class Portal < Sinatra::Application
     update_flags(params[:docs], params[:localization])
   end
 
+  def parse_patchset(patchset)
+    patchset.split('changes/').last.split(' ').first
+  end
+  
+  def format_patchsets(patchsets)
+    p = patchsets.split('*')
+    p.map! { |patchset| patchset = parse_patchset(patchset) if patchset.length > 13 }
+    p.join('*')
+  end
+
   post "/checkout" do
-    patchset = params.values.first
+    patchset = params.values.first.length > 13 ? parse_patcshet(params.values.first) : params.values.first
+    params['portal_form_patchset'] = patchset
     halt 400 if not Validation.validate_patchset(patchset)
     update_fields({portal_action: 'patchset checkout', patchset: patchset})
     flags?(params)
@@ -12,14 +23,16 @@ class Portal < Sinatra::Application
   end
 
   post "/checkout_multiple" do
-    patchsets = params.values.first
+    patchsets = format_patchsets(params.values.first)
     patchsets.split('*').each { |patchset| halt 400 if not Validation.validate_patchset(patchset) }
     update_fields({portal_action: 'multiple patchset checkout', multiple: patchsets})
     flags?(params)
+    params['patchsets'] = patchsets 
     Tools.btools_command(params)
   end
  
   post "/patchset_and_plugin" do
+    params[:patchset] = parse_patchset(params[:patchset]) if params[:patchset].length > 13 
     halt 400 if not Validation.validate_patchset(params[:patchset])
     halt 400 if not Validation.validate_plugin(params[:plugin])
     plugin_patchset = params[:plugin]

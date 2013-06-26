@@ -59,6 +59,7 @@ class Portal < Sinatra::Application
 
   before do
     @start_time = Time.now.to_f
+    update_fields({stage: "Initializing..."})
     if correct_route?
       Files.remove_error_file
       clear_flags
@@ -68,7 +69,7 @@ class Portal < Sinatra::Application
 
   after do
     PortalData.create! if PortalData.first == nil
-    update_fields({generating: false}) if PortalData.first.generating != false
+    update_fields({generating: false, stage: "Complete"}) if PortalData.first.generating != false
     store_action_time(route, (Time.now.to_f - @start_time)) if correct_route? && Validation.check_error_file
     if correct_route? && Validation.check_error_file == false 
       status 400

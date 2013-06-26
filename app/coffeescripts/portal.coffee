@@ -77,7 +77,11 @@ $ ->
     isValid = 0
     if patchsetElement.val().length > 0
       digitRegEx = /^\d+\/\d+\/\d+$/
-      pattern = new RegExp(digitRegEx)
+      urlRegEx = /^git\s(fetch|pull)\sssh:\/\/[a-zA-Z]*@gerrit.instructure.com:29418\/\D*\d+\/\d+\/\d+\s&&\sgit\s\w*\sFETCH_HEAD/
+      if patchsetElement.val().length < 13 
+        pattern = new RegExp(digitRegEx) 
+      else
+        pattern = new RegExp(urlRegEx)
       if pattern.test(patchsetElement.val().trim()) is false
         alert('invalid patchset')
         patchsetElement.val('')
@@ -87,6 +91,21 @@ $ ->
       isValid = 1
     isValid
 
+   poll = ->
+    console.log("Poll")
+    $.ajax
+      type: 'GET'
+      url: '/stage',
+      success: (data) ->
+        setLoadingText(data)
+        console.log("Success")
+        console.log(data)
+      complete: poll
+      timeout: 10000
+      error: (data) ->
+        console.log("Error")
+        console.log(data)
+   
   openLoadingScreen = (loadingText, action) ->
     setLoadingText(loadingText)
     $('#game').prepend('<iframe src="http://ryanflorence.com/snake" width="800" height="600"></iframe>')

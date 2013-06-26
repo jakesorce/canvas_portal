@@ -8,6 +8,7 @@ class CreatePortalData < ActiveRecord::Migration
 	t.string :multiple
 	t.string :portal_action
 	t.string :last_action_time
+	t.string :stage
 	t.boolean :old_branch
 	t.boolean :localization
 	t.boolean :documentation

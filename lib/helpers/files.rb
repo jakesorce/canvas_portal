@@ -3,7 +3,9 @@ require 'active_support'
 module Files
   ERROR_FILE = "#{Dirs::FILES}/error.txt"
   BTOOLS = "#{Dirs::CANVAS}/branch_tools.rb"
-  
+  DB_BACKUP = "#{Dirs::DB}/canvas_production"
+  DB_QUEUE_BACKUP = "#{Dirs::DB}/canvas_queue_production"
+ 
   def remove_error_file
     File.delete(ERROR_FILE) if File.exists? ERROR_FILE
   end

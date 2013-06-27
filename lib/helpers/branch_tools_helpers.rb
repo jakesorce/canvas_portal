@@ -229,16 +229,17 @@ module BTools
     FileUtils.rm_rf("public/optimized/plugins/demo_site")
   end
   
-  def BTools.kill_database_connections
+  def BTools.kill_database_connections(create_template = false)
     drop_command = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='canvas_production';"
     drop_command_queue = "select pg_terminate_backend(procpid) from pg_stat_activity where datname='canvas_queue_production';"
     system("sudo -u postgres psql -c \"#{drop_command}\"")
     system("sudo -u postgres psql -c \"#{drop_command_queue}\"")
+    template = create_template ? ' TEMPLATE template0' : ''
     system("psql -U canvas -c 'drop database canvas_production;'")
-    system("psql -U canvas -c 'create database canvas_production;'")
+    system("psql -U canvas -c 'create database canvas_production#{template};'")
     create_pg_extension
     system("psql -U canvas -c 'drop database canvas_queue_production;'")
-    system("psql -U canvas -c 'create database canvas_queue_production;'")
+    system("psql -U canvas -c 'create database canvas_queue_production#{template};'")
   end
   
   def BTools.checkout_all_plugins(do_remove = true, origin = nil)
@@ -367,6 +368,27 @@ module BTools
     database_dcm_initial_data
     enable_features
     post_setup(false)
+  end
+  
+  def BTools.system_caller(command)
+    output = `#{command}`
+    unless $?.exitstatus == 0
+      Writer.write_file(Files::ERROR_FILE, output)
+      exit! 1
+    end
+  end  
+
+  def BTools.backup_database
+    update_stage("Backing up database...")
+    system_caller("pg_dump -o -Ucanvas canvas_production > #{Files::DB_BACKUP}")
+    system_caller("pg_dump -o -Ucanvas canvas_queue_production > #{Files::DB_QUEUE_BACKUP}")
+  end
+
+  def BTools.restore_database
+    update_stage("Restoring dataase...")
+    kill_database_connections(true)
+    system_caller("sudo -u postgres psql canvas_production < #{Files::DB_BACKUP}")
+    system_caller("sudo -u postgres psql canvas_queue_production < #{Files::DB_QUEUE_BACKUP}")
   end
 
   def BTools.canvas_master

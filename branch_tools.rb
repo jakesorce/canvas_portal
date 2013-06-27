@@ -46,6 +46,10 @@ Dir.chdir('/home/hudson/canvas-lms') do
       BTools.checkout_multiple_plugins(options[:value].split('*'))
     when 'reset_database'
       BTools.reset_database
+    when 'backup_database'
+      BTools.backup_database
+    when 'restore_database'
+      BTools.restore_database
     when 'branch'
       value = options[:value]
       value == 'master' ? BTools.canvas_master : BTools.branch(value) 

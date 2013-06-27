@@ -154,7 +154,10 @@ $ ->
       timeout: 600000,
       success: (data) ->
         disableBeforeUnload()
-        window.location.replace(window.location.toString().split(':')[1])
+        if postUrl is '/backup_db' || postUrl is '/restore_db'
+          window.location.reload()
+        else
+          window.location.replace(window.location.toString().split(':')[1])
       error: (data) ->
         disableBeforeUnload()
         if postUrl is '/change_version'
@@ -422,6 +425,25 @@ $ ->
     if confirmation('Really reset database?')
       openLoadingScreen('Database resetting...', action)
       sendPost("/#{action}", [{name: 'reset_database', value: 'production'}])
+    else
+      setDropdownText($advancedOptionsDropdown, dropdownMessage)
+
+  $('#backup_db').bind 'click', (e) ->
+    action = 'backup_db'
+    console.log("backup db")
+    dropdownOptionClicked(e, $(this), $advancedOptionsDropdown)
+    if confirmation('Really backup database? This will overwrite any existing backup.')
+      openLoadingScreen('Backing up database...', action)
+      sendPost("/#{action}", [{name: 'backup_database', value: 'production'}])
+    else
+      setDropdownText($advancedOptionsDropdown, dropdownMessage)
+
+  $('#restore_db').bind 'click', (e) ->
+    action = 'restore_db'
+    dropdownOptionClicked(e, $(this), $advancedOptionsDropdown)
+    if confirmation('Really restore database?  This will overwrite your current database.')
+      openLoadingScreen('Restoring database...', action)
+      sendPost("/#{action}", [{name: 'restore_database', value: 'production'}])
     else
       setDropdownText($advancedOptionsDropdown, dropdownMessage)
 

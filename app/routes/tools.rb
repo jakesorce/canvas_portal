@@ -18,6 +18,16 @@ class Portal < Sinatra::Application
     update_fields({portal_action: 'reset database'})
     Tools.btools_command(params)
   end
+  
+  post '/backup_db' do
+    update_fields({portal_action: 'backup database'})
+    Tools.btools_command(params)
+  end
+
+  post '/restore_db' do
+    update_fields({portal_action: 'restore database'})
+    Tools.btools_command(params)
+  end
 
   post "/apache_server/:action" do |action|
     update_fields({portal_action: 'start server'}) if action == 'start'

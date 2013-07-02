@@ -1,4 +1,4 @@
-$ ->
+$ -> 
   $loadingDiv = $('#loading')
   $portalForm = $('#portal_form')
   $branches = $('#branches')

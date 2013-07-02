@@ -93,6 +93,8 @@ module BTools
       update_stage("Compiling assets...")
       c_m_assets_output = `export RAILS_ENV=production; bundle exec rake db:create db:migrate canvas:compile_assets[false]`
       check_for_error($?, "use advanced option 'View Server Log' for more info -- problem with db:migrate or canvas:compile_assets: #{c_m_assets_output}")
+      clear_queue_output = clear_queue_database
+      check_for_error($?, "use advanced option 'View Server Log' for more info -- problem clearing queue tables: #{clear_queue_output}")
     end
   end
 
@@ -242,6 +244,11 @@ module BTools
     system("psql -U canvas -c 'create database canvas_queue_production#{template};'")
   end
   
+  def BTools.clear_queue_database
+    update_stage("Clearing queue database...")
+    system_caller("psql -Ucanvas canvas_queue_production -c 'delete from delayed_jobs; delete from failed_jobs';")
+  end
+
   def BTools.checkout_all_plugins(do_remove = true, origin = nil)
     update_stage("Checking out plugins...")
     remove_all_plugins if do_remove

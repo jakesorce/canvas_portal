@@ -14,6 +14,7 @@ module Tools
   end
 
   def apache_server(action)
+    system("sudo cp #{Files::VHOST_FILE} /../etc/apache2/") if action == 'start'
     system("sudo service apache2 #{action}")
   end
 

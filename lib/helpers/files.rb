@@ -2,6 +2,7 @@ require 'active_support'
 
 module Files
   ERROR_FILE = "#{Dirs::FILES}/error.txt"
+  VHOST_FILE = "#{Dirs::PORTAL}/public/files/httpd.conf"
   BTOOLS = "#{Dirs::CANVAS}/branch_tools.rb"
   DB_BACKUP = "#{Dirs::DB}/canvas_production"
   DB_QUEUE_BACKUP = "#{Dirs::DB}/canvas_queue_production"
